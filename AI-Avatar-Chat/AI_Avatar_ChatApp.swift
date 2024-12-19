@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct AI_Avatar_ChatApp: App {
+struct AIAvatarChatApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
