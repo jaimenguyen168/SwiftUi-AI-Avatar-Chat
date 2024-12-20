@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AA43870C2D15356B00D56572 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = AA43870B2D15356B00D56572 /* SDWebImageSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		AAB7FEB02D148E57003BFA2D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA43870C2D15356B00D56572 /* SDWebImageSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -113,6 +118,7 @@
 			);
 			name = "AI-Avatar-Chat";
 			packageProductDependencies = (
+				AA43870B2D15356B00D56572 /* SDWebImageSwiftUI */,
 			);
 			productName = "AI-Avatar-Chat";
 			productReference = AAB7FE9E2D148E56003BFA2D /* AI-Avatar-Chat.app */;
@@ -196,6 +202,9 @@
 			);
 			mainGroup = AAB7FE952D148E56003BFA2D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA43870A2D15356B00D56572 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAB7FE9F2D148E56003BFA2D /* Products */;
 			projectDirPath = "";
@@ -622,6 +631,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA43870A2D15356B00D56572 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA43870B2D15356B00D56572 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA43870A2D15356B00D56572 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AAB7FE962D148E56003BFA2D /* Project object */;
 }
