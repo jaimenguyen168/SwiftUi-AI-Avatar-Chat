@@ -10,29 +10,59 @@ import SwiftUI
 struct OnboardingCompletedView: View {
     
     @Environment(AppState.self) private var root
+    @State private var isCompleting: Bool = false
+    var selectedColor: Color = .cyan
     
     var body: some View {
-        VStack {
-            Text("Completed")
-                .frame(maxHeight: .infinity)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Setup complete!")
+                .font(.largeTitle)
+                .fontWeight(.semibold)
+                .foregroundStyle(selectedColor)
             
-            Button {
-                onFinishButtonTapped()
-            } label: {
-                Text("Finish")
-                    .callToActionButton()
-            }
+            Text("We've successfully set up your AI avatar chat account. You are now ready to start chatting with your new AI-generated friend!")
+                .font(.title2)
+                .fontWeight(.medium)
+                .foregroundStyle(.secondary)
 
         }
-        .padding(16)
+        .toolbar(.hidden, for: .navigationBar)
+        .frame(maxHeight: .infinity)
+        .safeAreaInset(edge: .bottom, content: {
+            finishButton
+        })
+        .padding(24)
+    }
+    
+    private var finishButton: some View {
+        Button {
+            onFinishButtonTapped()
+        } label: {
+            ZStack {
+                if isCompleting {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Text("Finish")
+                }
+            }
+            .callToActionButton()
+        }
+        .disabled(isCompleting)
     }
     
     private func onFinishButtonTapped() {
-        root.updateViewState(showTabBarView: true)
+        isCompleting = true
+        Task {
+            try await Task.sleep(for: .seconds(2))
+            isCompleting = false
+            
+            root.updateViewState(showTabBarView: true)
+        }
     }
 }
 
 #Preview {
-    OnboardingCompletedView()
+    OnboardingCompletedView(selectedColor: .mint)
         .environment(AppState())
 }

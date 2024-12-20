@@ -18,6 +18,7 @@ struct OnboardingIntroView: View {
         }
         .font(.title3)
         .padding(24)
+        .toolbar(.hidden, for: .navigationBar)
     }
     
     private var introductionText: some View {
