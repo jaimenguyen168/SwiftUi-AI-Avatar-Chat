@@ -18,7 +18,7 @@ struct TabBarView: View {
     var body: some View {
         NavigationStack {
             TabView(selection: $selectedTab) {
-                Text("Explore")
+                ExploreView()
                     .tabItem {
                         Label("Explore", systemImage: "eyes")
                     }

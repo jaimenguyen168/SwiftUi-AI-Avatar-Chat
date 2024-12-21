@@ -54,7 +54,7 @@ struct Avatar: Hashable {
                 character: .alien,
                 action: .eating,
                 location: .beach,
-                profileImageUrl: Constants.randomImageurl,
+                profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
                 dateCreated: .now
             ),
@@ -64,7 +64,7 @@ struct Avatar: Hashable {
                 character: .dog,
                 action: .smiling,
                 location: .space,
-                profileImageUrl: Constants.randomImageurl,
+                profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
                 dateCreated: .now
             ),
@@ -74,7 +74,7 @@ struct Avatar: Hashable {
                 character: .cat,
                 action: .working,
                 location: .desert,
-                profileImageUrl: Constants.randomImageurl,
+                profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
                 dateCreated: .now
             ),
@@ -84,7 +84,7 @@ struct Avatar: Hashable {
                 character: .woman,
                 action: .dancing,
                 location: .forest,
-                profileImageUrl: Constants.randomImageurl,
+                profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
                 dateCreated: .now
             )
@@ -92,10 +92,12 @@ struct Avatar: Hashable {
     }
 }
 
-enum Character: String {
+enum Character: String, Hashable, CaseIterable, Identifiable {
     case man, woman, alien, robot, dog, cat
     
     static var `default`: Self { .alien }
+    
+    var id: String { self.rawValue }
 }
 
 enum Action: String {

@@ -8,6 +8,10 @@
 import SwiftUI
 
 extension View {
+    static func customWidth(percent: CGFloat) -> CGFloat {
+        UIScreen.main.bounds.width * (percent / 100)
+    }
+    
     func callToActionButton() -> some View {
         self
             .font(.headline)
@@ -19,5 +23,28 @@ extension View {
     
     func tappableBackground() -> some View {
         background(.black.opacity(0.001))
+    }
+    
+    func formatListRow() -> some View {
+        self
+            .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 0, trailing: 0))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+    }
+    
+    func gradientBackgroundForLeadingText() -> some View {
+        self
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                .linearGradient(
+                    colors: [
+                        .black.opacity(0),
+                        .black.opacity(0.3),
+                        .black.opacity(0.5)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
     }
 }

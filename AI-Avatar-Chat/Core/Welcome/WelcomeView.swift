@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WelcomeView: View {
     
-    @State var imageUrl = Constants.randomImageurl
+    @State var imageUrl = Constants.randomImageUrl
     
     var body: some View {
         NavigationStack {

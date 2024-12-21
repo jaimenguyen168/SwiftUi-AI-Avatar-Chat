@@ -11,7 +11,7 @@ struct HeroCellView: View {
     
     var title: String? = "Some title"
     var subtitle: String? = "Some subtitle goes here"
-    var imageUrl: String? = Constants.randomImageurl
+    var imageUrl: String? = Constants.randomImageUrl
     
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -36,18 +36,7 @@ struct HeroCellView: View {
             }
             .foregroundStyle(.white)
             .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                .linearGradient(
-                    colors: [
-                        .black.opacity(0),
-                        .black.opacity(0.3),
-                        .black.opacity(0.5)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .gradientBackgroundForLeadingText()
         }
         .clipShape(.rect(cornerRadius: 16))
     }
