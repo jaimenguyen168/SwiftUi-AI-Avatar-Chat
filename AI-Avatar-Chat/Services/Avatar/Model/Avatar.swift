@@ -98,6 +98,13 @@ enum Character: String, Hashable, CaseIterable, Identifiable {
     static var `default`: Self { .alien }
     
     var id: String { self.rawValue }
+    
+    var startsWithVowel: Bool {
+        guard let firstLetter = self.rawValue.first?.lowercased() else {
+            return false
+        }
+        return ["a", "e", "i", "o", "u"].contains(firstLetter)
+    }
 }
 
 enum Action: String {
@@ -130,6 +137,6 @@ struct AvatarDescriptionBuilder {
     }
     
     var description: String {
-        "\(character == .alien ? "An" : "A") \(character.rawValue) is \(action.rawValue) in the \(location.rawValue)"
+        "\(character.startsWithVowel ? "An" : "A") \(character.rawValue) is \(action.rawValue) in the \(location.rawValue)"
     }
 }
