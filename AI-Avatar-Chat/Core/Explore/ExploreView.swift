@@ -35,6 +35,9 @@ struct ExploreView: View {
                         imageUrl: avatar.profileImageUrl
                     )
                     .frame(width: carouselWidth, height: 200)
+                    .customButton {
+                        //
+                    }
                 }
             }
             .formatListRow()
@@ -55,6 +58,9 @@ struct ExploreView: View {
                                 imageUrl: Constants.randomImageUrl
                             )
                             .offset(x: 20)
+                            .customButton(.pressable) {
+                                //
+                            }
                         }
                     }
                 }
@@ -77,6 +83,10 @@ struct ExploreView: View {
                     subtitle: avatar.description,
                     imageUrl: avatar.profileImageUrl
                 )
+                .tappableBackground()
+                .customButton(.highlight(cornerRadius: 16)) {
+                    //
+                }
                 .formatListRow()
                 .padding(.horizontal)
             }
