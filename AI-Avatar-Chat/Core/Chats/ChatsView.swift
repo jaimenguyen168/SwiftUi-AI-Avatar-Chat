@@ -14,7 +14,22 @@ struct ChatsView: View {
     var body: some View {
         List {
             ForEach(chats) { chat in
-                Text(chat.dateModified.description)
+                ChatRowCellViewBuilder(
+                    currentUserId: nil,
+                    chat: chat,
+                    getAvatar: {
+                        try? await Task.sleep(for: .seconds(1))
+                        return Avatar.mock
+                    },
+                    getLastChatMessage: {
+                        try? await Task.sleep(for: .seconds(1))
+                        return ChatMessage.mock
+                    }
+                )
+                .customButton(.pressable) {
+                    //
+                }
+                .listRowInsets(EdgeInsets(.zero))
             }
         }
     }
