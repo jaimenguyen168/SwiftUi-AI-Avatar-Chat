@@ -8,8 +8,15 @@
 import SwiftUI
 
 struct ChatsView: View {
+    
+    @State private var chats: [Chat] = Chat.mocks
+    
     var body: some View {
-        Text("Hello, Chats!")
+        List {
+            ForEach(chats) { chat in
+                Text(chat.dateModified.description)
+            }
+        }
     }
 }
 
