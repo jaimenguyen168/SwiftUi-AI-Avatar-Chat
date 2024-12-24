@@ -16,12 +16,13 @@ struct ProfileView: View {
     @State private var isLoading: Bool = true
     
     var body: some View {
-        VStack {
+        NavigationStack {
             List {
                 currentUserInfoSection
                 
                 myAvatarSection
             }
+            .navigationTitle("Profile")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     settingButton
@@ -50,6 +51,8 @@ struct ProfileView: View {
             ZStack {
                 Circle()
                     .fill(currentUser.profileColorSwift ?? .accent)
+                
+                
             }
             .frame(width: 100, height: 100)
             .frame(maxWidth: .infinity)

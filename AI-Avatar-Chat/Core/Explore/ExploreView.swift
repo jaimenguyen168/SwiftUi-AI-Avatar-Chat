@@ -15,14 +15,17 @@ struct ExploreView: View {
     let carouselWidth = customWidth(percent: 90)
     
     var body: some View {
-        List {
-            featuredSection
-            
-            categorySection
-            
-            popularSection
+        NavigationStack {
+            List {
+                featuredSection
+                
+                categorySection
+                
+                popularSection
+            }
+            .listStyle(.grouped)
+            .navigationTitle("Explore")
         }
-        .listStyle(.grouped)
     }
     
     private var featuredSection: some View {
