@@ -59,28 +59,4 @@ extension Color {
             return String(format: "#%02X%02X%02X", r, g, b)
         }
     }
-    
-//    func toHex(includeAlpha: Bool = false) -> String? {
-//        let uiColor = UIColor(self) // Convert Color to UIColor
-//        var red: CGFloat = 0
-//        var green: CGFloat = 0
-//        var blue: CGFloat = 0
-//        var alpha: CGFloat = 0
-//        let r, g, b, a: Int // swiftlint:disable:this identifier_name
-//        
-//        guard uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-//            return nil
-//        }
-//        
-//        r = Int(red * 255)
-//        g = Int(green * 255)
-//        b = Int(blue * 255)
-//        a = Int(alpha * 255)
-//        
-//        if includeAlpha {
-//            return String(format: "#%02X%02X%02X%02X", r, g, b, a)
-//        } else {
-//            return String(format: "#%02X%02X%02X", r, g, b)
-//        }
-//    }
 }

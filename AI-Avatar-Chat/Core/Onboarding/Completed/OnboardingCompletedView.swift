@@ -29,25 +29,13 @@ struct OnboardingCompletedView: View {
         .toolbar(.hidden, for: .navigationBar)
         .frame(maxHeight: .infinity)
         .safeAreaInset(edge: .bottom, content: {
-            finishButton
+            AsyncCallToActionButton(
+                title: "Finish",
+                isLoading: isCompleting,
+                action: onFinishButtonTapped
+            )
         })
         .padding(24)
-    }
-    
-    private var finishButton: some View {
-        ZStack {
-            if isCompleting {
-                ProgressView()
-                    .tint(.white)
-            } else {
-                Text("Finish")
-            }
-        }
-        .callToActionButton()
-        .customButton(.pressable) {
-            onFinishButtonTapped()
-        }
-        .disabled(isCompleting)
     }
     
     private func onFinishButtonTapped() {

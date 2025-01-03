@@ -43,6 +43,12 @@ extension View {
             .listRowSeparator(.hidden)
     }
     
+    func removeBgAndInsetsListRow() -> some View {
+        self
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(.zero))
+    }
+    
     func gradientBackgroundForLeadingText() -> some View {
         self
             .frame(maxWidth: .infinity, alignment: .leading)

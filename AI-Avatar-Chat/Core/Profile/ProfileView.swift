@@ -33,7 +33,7 @@ struct ProfileView: View {
             SettingsView()
         }
         .fullScreenCover(isPresented: $showCreateAvatarView) {
-            Text("new avatar")
+            CreateAvatarView()
         }
         .task {
             await loadData()
@@ -51,8 +51,6 @@ struct ProfileView: View {
             ZStack {
                 Circle()
                     .fill(currentUser.profileColorSwift ?? .accent)
-                
-                
             }
             .frame(width: 100, height: 100)
             .frame(maxWidth: .infinity)
