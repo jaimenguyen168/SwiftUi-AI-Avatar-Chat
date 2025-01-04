@@ -32,7 +32,7 @@ struct User {
     }
     
     static var mock: Self {
-        mocks[2]
+        mocks[0]
     }
     
     static var mocks: [Self] {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ChatMessage {
+struct ChatMessage: Hashable, Identifiable {
     let id: String
     let chatId: String
     let authorId: String?
@@ -53,4 +53,91 @@ struct ChatMessage {
             )
         }
     }
+    
+    static var mockConversation: [ChatMessage] {
+            let now = Date()
+            let chatId = UUID().uuidString
+            return [
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser1",
+                    content: "Hey, how's it going?",
+                    seenByIds: ["user_2"],
+                    dateCreated: now.addTimeInterval(minutes: -50)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser2",
+                    content: "Pretty good, how about you?",
+                    seenByIds: ["user_1"],
+                    dateCreated: now.addTimeInterval(minutes: -48)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser1",
+                    content: "Not bad, just been busy with work lately.",
+                    seenByIds: ["user_2"],
+                    dateCreated: now.addTimeInterval(minutes: -46)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser2",
+                    content: "I hear you! Same here. What’s keeping you busy?",
+                    seenByIds: ["user_1"],
+                    dateCreated: now.addTimeInterval(minutes: -44)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser1",
+                    content: "Mainly wrapping up a new project. It’s been intense.",
+                    seenByIds: ["user_2"],
+                    dateCreated: now.addTimeInterval(minutes: -42)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser2",
+                    content: "That sounds exciting! What's the project about?",
+                    seenByIds: ["user_1"],
+                    dateCreated: now.addTimeInterval(minutes: -40)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser1",
+                    content: "It’s a new app for managing personal finances. Still a lot to do!",
+                    seenByIds: ["user_2"],
+                    dateCreated: now.addTimeInterval(minutes: -38)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser2",
+                    content: "That sounds useful. Let me know when it's done!",
+                    seenByIds: ["user_1"],
+                    dateCreated: now.addTimeInterval(minutes: -36)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser1",
+                    content: "Will do! How’s everything on your end?",
+                    seenByIds: ["user_2"],
+                    dateCreated: now.addTimeInterval(minutes: -34)
+                ),
+                ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: chatId,
+                    authorId: "mockUser2",
+                    content: "Busy, but good. Let’s catch up more soon!",
+                    seenByIds: ["user_1"],
+                    dateCreated: now.addTimeInterval(minutes: -32)
+                )
+            ]
+        }
 }
