@@ -16,7 +16,8 @@ struct ChatView: View {
     @State private var textMessage = ""
     @State private var scrollPosition: String?
     
-    @State private var showChatSettings = false
+    @State private var showChatSettings: AppAlert?
+    @State private var showAlert: AppAlert?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -31,27 +32,14 @@ struct ChatView: View {
                 Image(systemName: "ellipsis")
                     .foregroundStyle(.accent)
                     .padding(8)
+                    .tappableBackground()
                     .customButton {
                         onChatSettingPress()
                     }
             }
         }
-        .confirmationDialog(
-            "",
-            isPresented: $showChatSettings,
-            actions: {
-                Button("Report User / Chat", role: .destructive) {
-                    
-                }
-                
-                Button("Delete Chat", role: .destructive) {
-                    
-                }
-            },
-            message: {
-                Text("What would you like to do?")
-            }
-        )
+        .showCustomAlert(type: .confirmationDialog, alert: $showChatSettings)
+        .showCustomAlert(alert: $showAlert)
     }
 }
 
@@ -113,24 +101,41 @@ private extension ChatView {
     func onSendMessagePress() {
         guard let currentUser else { return }
         
-        let message = ChatMessage(
-            id: UUID().uuidString,
-            chatId: UUID().uuidString,
-            authorId: currentUser.userId,
-            content: textMessage,
-            seenByIds: nil,
-            dateCreated: .now
-        )
-        
-        chatMessages.append(message)
-        
-        scrollPosition = message.id
-        
-        textMessage = ""
+        do {
+            try TextValidationHelper.validateText(text: textMessage)
+            
+            let message = ChatMessage(
+                id: UUID().uuidString,
+                chatId: UUID().uuidString,
+                authorId: currentUser.userId,
+                content: textMessage,
+                seenByIds: nil,
+                dateCreated: .now
+            )
+            
+            chatMessages.append(message)
+            
+            scrollPosition = message.id
+            
+            textMessage = ""
+        } catch {
+            showAlert = AppAlert(error: error)
+        }
     }
     
     func onChatSettingPress() {
-        showChatSettings = true
+        showChatSettings = AppAlert(
+            title: "",
+            subtitle: "What would you like to do?",
+            buttons: {
+                AnyView(
+                    Group {
+                        Button("Report User / Chat", role: .destructive) {}
+                        Button("Delete Chat", role: .destructive) {}
+                    }
+                )
+            }
+        )
     }
 }
 
