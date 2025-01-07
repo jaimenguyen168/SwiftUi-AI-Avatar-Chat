@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Avatar: Hashable {
-    let avatarId: String
+struct Avatar: Hashable, Identifiable {
+    let id: String
     let name: String?
     let character: Character?
     let action: Action?
@@ -32,7 +32,7 @@ struct Avatar: Hashable {
         authodId: String? = nil,
         dateCreated: Date = Date()
     ) {
-        self.avatarId = avatarId
+        self.id = avatarId
         self.name = name
         self.character = character
         self.action = action

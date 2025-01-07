@@ -57,7 +57,7 @@ struct ExploreView: View {
                     HStack(spacing: 12) {
                         ForEach(categories) { category in
                             CategoryCellView(
-                                title: category.rawValue.capitalized,
+                                title: category.plural.capitalized,
                                 imageUrl: Constants.randomImageUrl
                             )
                             .offset(x: 20)

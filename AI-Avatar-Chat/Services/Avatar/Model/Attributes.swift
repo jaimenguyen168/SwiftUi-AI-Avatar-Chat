@@ -14,6 +14,17 @@ enum Character: String, Hashable, CaseIterable, Identifiable {
     
     var id: String { self.rawValue }
     
+    var plural: String {
+        switch self {
+        case .man: "men"
+        case .woman: "women"
+        case .alien: "aliens"
+        case .robot: "robots"
+        case .dog: "dogs"
+        case .cat: "cats"
+        }
+    }
+    
     var startsWithVowel: Bool {
         guard let firstLetter = self.rawValue.first?.lowercased() else {
             return false
