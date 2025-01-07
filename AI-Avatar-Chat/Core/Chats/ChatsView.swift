@@ -10,6 +10,7 @@ import SwiftUI
 struct ChatsView: View {
     
     @State private var chats: [Chat] = Chat.mocks
+    @State private var selectedChat: Chat?
     
     var body: some View {
         NavigationStack {
@@ -28,19 +29,20 @@ struct ChatsView: View {
                         }
                     )
                     .customButton(.pressable) {
-                        //
+                        selectedChat = chat
                     }
                     .listRowInsets(EdgeInsets(.zero))
                 }
             }
             .navigationTitle("Chats")
+            .navigationDestination(item: $selectedChat) { _ in
+                ChatView()
+            }
         }
     }
 }
 
 #Preview {
-    NavigationStack {
-        ChatsView()
-            .navigationTitle(TabBarItem.chats.rawValue.capitalized)
-    }
+    ChatsView()
+        .navigationTitle(TabBarItem.chats.rawValue.capitalized)
 }

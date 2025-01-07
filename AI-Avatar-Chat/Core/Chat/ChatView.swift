@@ -13,6 +13,8 @@ struct ChatView: View {
     @State private var avatar: Avatar? = .mock
     @State private var currentUser: User? = .mock
     
+    @State private var showProfileModal = false
+    
     @State private var textMessage = ""
     @State private var scrollPosition: String?
     
@@ -40,6 +42,11 @@ struct ChatView: View {
         }
         .showCustomAlert(type: .confirmationDialog, alert: $showChatSettings)
         .showCustomAlert(alert: $showAlert)
+        .showModal(showModal: $showProfileModal) {
+            if let avatar {
+                profileModal(avatar: avatar)
+            }
+        }
     }
 }
 
@@ -53,7 +60,10 @@ private extension ChatView {
                     ChatBubbleViewBuilder(
                         message: message,
                         isCurrentUser: isCurrentUser,
-                        imageName: isCurrentUser ? nil : avatar?.profileImageUrl
+                        imageName: isCurrentUser ? nil : avatar?.profileImageUrl,
+                        onImagePress: {
+                            onAvatarImagePress()
+                        }
                     )
                 }
             }
@@ -94,6 +104,20 @@ private extension ChatView {
             .padding(.horizontal)
             .padding(.vertical, 6)
             .background(Color(uiColor: .secondarySystemBackground))
+    }
+    
+    func profileModal(avatar: Avatar) -> some View {
+        ProfileModalView(
+            imageName: avatar.profileImageUrl,
+            title: avatar.name,
+            subtitle: avatar.character?.rawValue.capitalized,
+            headline: avatar.description,
+            onXmarkPress: {
+                showProfileModal = false
+            }
+        )
+        .padding(40)
+        .transition(.move(edge: .leading))
     }
 }
 
@@ -136,6 +160,10 @@ private extension ChatView {
                 )
             }
         )
+    }
+    
+    func onAvatarImagePress() {
+        showProfileModal = true
     }
 }
 

@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct Chat: Identifiable {
+struct Chat: Identifiable, Hashable {
     let id: String
     let userId: String
     let avatarId: String
