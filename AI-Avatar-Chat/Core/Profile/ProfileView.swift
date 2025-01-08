@@ -15,6 +15,8 @@ struct ProfileView: View {
     @State private var myAvatars: [Avatar] = []
     @State private var isLoading: Bool = true
     
+    @State private var selectedAvatar: Avatar?
+    
     var body: some View {
         NavigationStack {
             List {
@@ -35,18 +37,18 @@ struct ProfileView: View {
         .fullScreenCover(isPresented: $showCreateAvatarView) {
             CreateAvatarView()
         }
+        .navigationDestination(item: $selectedAvatar, destination: { _ in
+            ChatView()
+        })
         .task {
             await loadData()
         }
     }
-    
-    private func loadData() async {
-        try? await Task.sleep(for: .seconds(3))
-        isLoading = false
-        myAvatars = Avatar.mocks
-    }
-    
-    private var currentUserInfoSection: some View {
+}
+
+// View section
+private extension ProfileView {
+    var currentUserInfoSection: some View {
         Section {
             ZStack {
                 Circle()
@@ -58,7 +60,7 @@ struct ProfileView: View {
         }
     }
     
-    private var myAvatarSection: some View {
+    var myAvatarSection: some View {
         Section {
             if myAvatars.isEmpty {
                 ZStack {
@@ -81,7 +83,7 @@ struct ProfileView: View {
                         imageUrl: avatar.profileImageUrl
                     )
                     .customButton(.highlight(cornerRadius: 12)) {
-                        //
+                        onAvatarPress(avatar)
                     }
                     .formatListRow()
                 }
@@ -105,11 +107,7 @@ struct ProfileView: View {
         }
     }
     
-    private func onNewAvatarButtonTap() {
-        showCreateAvatarView = true
-    }
-    
-    private var settingButton: some View {
+    var settingButton: some View {
         Image(systemName: "gear")
             .font(.headline)
             .foregroundStyle(.accent)
@@ -117,14 +115,31 @@ struct ProfileView: View {
                 onSettingsButtonTap()
             }
     }
+}
+
+// Logic section
+private extension ProfileView {
+    func loadData() async {
+        try? await Task.sleep(for: .seconds(3))
+        isLoading = false
+        myAvatars = Avatar.mocks
+    }
     
-    private func onSettingsButtonTap() {
+    func onNewAvatarButtonTap() {
+        showCreateAvatarView = true
+    }
+    
+    func onSettingsButtonTap() {
         showSettingsView = true
     }
     
-    private func onDeleteAvatar(indexSet: IndexSet) {
+    func onDeleteAvatar(indexSet: IndexSet) {
         guard let index = indexSet.first else { return }
         myAvatars.remove(at: index)
+    }
+    
+    func onAvatarPress(_ avatar: Avatar) {
+        selectedAvatar = avatar
     }
 }
 

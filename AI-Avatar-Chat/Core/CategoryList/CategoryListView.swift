@@ -12,6 +12,7 @@ struct CategoryListView: View {
     var category: Character = .default
     var imageName = Constants.randomImageUrl
     @State private var avatars: [Avatar] = Avatar.mocks
+    @State private var selectedAvatar: Avatar?
     
     var body: some View {
         List {
@@ -29,12 +30,24 @@ struct CategoryListView: View {
                     subtitle: avatar.description,
                     imageUrl: avatar.profileImageUrl
                 )
+                .customButton {
+                    onAvatarPress(avatar)
+                }
             }
             .removeBgAndInsetsListRow()
             .padding(6)
         }
         .ignoresSafeArea()
         .listStyle(.plain)
+        .navigationDestination(item: $selectedAvatar) { _ in
+            ChatView()
+        }
+    }
+}
+
+private extension CategoryListView {
+    func onAvatarPress(_ avatar: Avatar) {
+        selectedAvatar = avatar
     }
 }
 

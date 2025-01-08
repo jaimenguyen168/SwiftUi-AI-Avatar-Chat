@@ -14,6 +14,9 @@ struct ExploreView: View {
     @State private var popularAvatars: [Avatar] = Avatar.mocks
     let carouselWidth = customWidth(percent: 90)
     
+    @State private var selectedAvatar: Avatar?
+    @State private var selectedCategory: Character?
+    
     var body: some View {
         NavigationStack {
             List {
@@ -25,10 +28,21 @@ struct ExploreView: View {
             }
             .listStyle(.grouped)
             .navigationTitle("Explore")
+            .navigationDestination(item: $selectedAvatar) { _ in
+                ChatView()
+            }
+            .navigationDestination(item: $selectedCategory) { category in
+                CategoryListView(
+                    category: category
+                )
+            }
         }
     }
-    
-    private var featuredSection: some View {
+}
+
+// View sections
+private extension ExploreView {
+    var featuredSection: some View {
         Section {
             ZStack { // put in Zstack helps remove the glitch when swiping
                 CarouselView(items: featuredAvatars) { avatar in
@@ -39,7 +53,7 @@ struct ExploreView: View {
                     )
                     .frame(width: carouselWidth, height: 200)
                     .customButton {
-                        //
+                        onAvatarPress(avatar)
                     }
                 }
             }
@@ -50,19 +64,25 @@ struct ExploreView: View {
         }
     }
     
-    private var categorySection: some View {
+    var categorySection: some View {
         Section {
             ZStack {
                 ScrollView(.horizontal) {
                     HStack(spacing: 12) {
                         ForEach(categories) { category in
-                            CategoryCellView(
-                                title: category.plural.capitalized,
-                                imageUrl: Constants.randomImageUrl
-                            )
-                            .offset(x: 20)
-                            .customButton(.pressable) {
-                                //
+                            let imageName = popularAvatars.first(where: {
+                                $0.character == category
+                            })?.profileImageUrl
+                            
+                            if let imageName {
+                                CategoryCellView(
+                                    title: category.plural.capitalized,
+                                    imageUrl: imageName
+                                )
+                                .offset(x: 20)
+                                .customButton(.pressable) {
+                                    onCategoryPress(category)
+                                }
                             }
                         }
                     }
@@ -78,7 +98,7 @@ struct ExploreView: View {
         }
     }
     
-    private var popularSection: some View {
+    var popularSection: some View {
         Section {
             ForEach(popularAvatars, id: \.self) { avatar in
                 CustomListCellView(
@@ -88,7 +108,7 @@ struct ExploreView: View {
                 )
                 .tappableBackground()
                 .customButton(.highlight(cornerRadius: 16)) {
-                    //
+                    onAvatarPress(avatar)
                 }
                 .formatListRow()
                 .padding(.horizontal)
@@ -100,9 +120,18 @@ struct ExploreView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        ExploreView()
-            .navigationTitle(TabBarItem.explore.rawValue.capitalized)
+// Logic sections
+private extension ExploreView {
+    func onAvatarPress(_ avatar: Avatar) {
+        selectedAvatar = avatar
     }
+    
+    func onCategoryPress(_ category: Character) {
+        selectedCategory = category
+    }
+}
+
+#Preview {
+    ExploreView()
+        .navigationTitle(TabBarItem.explore.rawValue.capitalized)
 }

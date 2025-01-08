@@ -21,15 +21,15 @@ struct ChatsView: View {
                         chat: chat,
                         getAvatar: {
                             try? await Task.sleep(for: .seconds(1))
-                            return Avatar.mock
+                            return Avatar.mocks.randomElement()!
                         },
                         getLastChatMessage: {
                             try? await Task.sleep(for: .seconds(1))
-                            return ChatMessage.mock
+                            return ChatMessage.mocks.randomElement()!
                         }
                     )
                     .customButton(.pressable) {
-                        selectedChat = chat
+                        onChatPress(chat)
                     }
                     .listRowInsets(EdgeInsets(.zero))
                 }
@@ -39,6 +39,12 @@ struct ChatsView: View {
                 ChatView()
             }
         }
+    }
+}
+
+private extension ChatsView {
+    func onChatPress(_ chat: Chat) {
+        selectedChat = chat
     }
 }
 
