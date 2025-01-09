@@ -15,7 +15,7 @@ struct ProfileView: View {
     @State private var myAvatars: [Avatar] = []
     @State private var isLoading: Bool = true
     
-    @State private var selectedAvatar: Avatar?
+    @State private var option: NavigationCoreOption?
     
     var body: some View {
         NavigationStack {
@@ -37,9 +37,7 @@ struct ProfileView: View {
         .fullScreenCover(isPresented: $showCreateAvatarView) {
             CreateAvatarView()
         }
-        .navigationDestination(item: $selectedAvatar, destination: { _ in
-            ChatView()
-        })
+        .navigationDestinationCoreOption(option: $option)
         .task {
             await loadData()
         }
@@ -139,7 +137,7 @@ private extension ProfileView {
     }
     
     func onAvatarPress(_ avatar: Avatar) {
-        selectedAvatar = avatar
+        option = .chat(avatar: avatar)
     }
 }
 

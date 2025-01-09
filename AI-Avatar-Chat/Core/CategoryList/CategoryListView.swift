@@ -12,7 +12,7 @@ struct CategoryListView: View {
     var category: Character = .default
     var imageName = Constants.randomImageUrl
     @State private var avatars: [Avatar] = Avatar.mocks
-    @State private var selectedAvatar: Avatar?
+    @State private var option: NavigationCoreOption?
     
     var body: some View {
         List {
@@ -39,15 +39,13 @@ struct CategoryListView: View {
         }
         .ignoresSafeArea()
         .listStyle(.plain)
-        .navigationDestination(item: $selectedAvatar) { _ in
-            ChatView()
-        }
+        .navigationDestinationCoreOption(option: $option)
     }
 }
 
 private extension CategoryListView {
     func onAvatarPress(_ avatar: Avatar) {
-        selectedAvatar = avatar
+        option = .chat(avatar: avatar)
     }
 }
 

@@ -9,8 +9,9 @@ import SwiftUI
 
 struct ChatView: View {
     
+    var avatar: Avatar = .mock
+    
     @State private var chatMessages: [ChatMessage] = ChatMessage.mockConversation
-    @State private var avatar: Avatar? = .mock
     @State private var currentUser: User? = .mock
     
     @State private var showProfileModal = false
@@ -27,7 +28,7 @@ struct ChatView: View {
             
             sendMessageSection
         }
-        .navigationTitle(avatar?.name ?? "")
+        .navigationTitle(avatar.name ?? "")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -43,9 +44,7 @@ struct ChatView: View {
         .showCustomAlert(type: .confirmationDialog, alert: $showChatSettings)
         .showCustomAlert(alert: $showAlert)
         .showModal(showModal: $showProfileModal) {
-            if let avatar {
-                profileModal(avatar: avatar)
-            }
+            profileModal(avatar: avatar)
         }
     }
 }
@@ -60,7 +59,7 @@ private extension ChatView {
                     ChatBubbleViewBuilder(
                         message: message,
                         isCurrentUser: isCurrentUser,
-                        imageName: isCurrentUser ? nil : avatar?.profileImageUrl,
+                        imageName: isCurrentUser ? nil : avatar.profileImageUrl,
                         onImagePress: {
                             onAvatarImagePress()
                         }

@@ -14,8 +14,7 @@ struct ExploreView: View {
     @State private var popularAvatars: [Avatar] = Avatar.mocks
     let carouselWidth = customWidth(percent: 90)
     
-    @State private var selectedAvatar: Avatar?
-    @State private var selectedCategory: Character?
+    @State private var option: NavigationCoreOption?
     
     var body: some View {
         NavigationStack {
@@ -28,14 +27,7 @@ struct ExploreView: View {
             }
             .listStyle(.grouped)
             .navigationTitle("Explore")
-            .navigationDestination(item: $selectedAvatar) { _ in
-                ChatView()
-            }
-            .navigationDestination(item: $selectedCategory) { category in
-                CategoryListView(
-                    category: category
-                )
-            }
+            .navigationDestinationCoreOption(option: $option)
         }
     }
 }
@@ -81,7 +73,10 @@ private extension ExploreView {
                                 )
                                 .offset(x: 20)
                                 .customButton(.pressable) {
-                                    onCategoryPress(category)
+                                    onCategoryPress(
+                                        category: category,
+                                        imageName: imageName
+                                    )
                                 }
                             }
                         }
@@ -123,11 +118,18 @@ private extension ExploreView {
 // Logic sections
 private extension ExploreView {
     func onAvatarPress(_ avatar: Avatar) {
-        selectedAvatar = avatar
+        option = .chat(avatar: avatar)
     }
     
-    func onCategoryPress(_ category: Character) {
-        selectedCategory = category
+    func onCategoryPress(
+        category: Character,
+        imageName: String
+    ) {
+        option = 
+            .category(
+            category: category,
+            imageName: imageName
+        )
     }
 }
 
