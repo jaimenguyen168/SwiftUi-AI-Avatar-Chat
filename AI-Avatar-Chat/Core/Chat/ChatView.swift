@@ -41,6 +41,7 @@ struct ChatView: View {
                     }
             }
         }
+        .toolbar(.hidden, for: .tabBar)
         .showCustomAlert(type: .confirmationDialog, alert: $showChatSettings)
         .showCustomAlert(alert: $showAlert)
         .showModal(showModal: $showProfileModal) {
@@ -70,9 +71,14 @@ private extension ChatView {
             .padding(8)
         }
         .defaultScrollAnchor(.bottom)
-        .scrollPosition(id: $scrollPosition, anchor: .center)
+        .scrollPosition(id: $scrollPosition, anchor: .bottom)
         .animation(.default, value: chatMessages.count)
         .animation(.default, value: scrollPosition)
+        .onAppear {
+            withAnimation(.default) {
+                scrollPosition = chatMessages.last?.id
+            }
+        }
     }
     
     var sendMessageSection: some View {

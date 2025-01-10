@@ -30,6 +30,7 @@ struct ProfileView: View {
                     settingButton
                 }
             }
+            .navigationDestinationCoreOption(option: $option)
         }
         .sheet(isPresented: $showSettingsView) {
             SettingsView()
@@ -37,7 +38,6 @@ struct ProfileView: View {
         .fullScreenCover(isPresented: $showCreateAvatarView) {
             CreateAvatarView()
         }
-        .navigationDestinationCoreOption(option: $option)
         .task {
             await loadData()
         }
