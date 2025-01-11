@@ -12,7 +12,7 @@ struct ChatView: View {
     var avatar: Avatar = .mock
     
     @State private var chatMessages: [ChatMessage] = ChatMessage.mockConversation
-    @State private var currentUser: User? = .mock
+    @State private var currentUser: AppUser? = .mock
     
     @State private var showProfileModal = false
     

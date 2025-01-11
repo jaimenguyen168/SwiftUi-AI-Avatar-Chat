@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct User {
+struct AppUser {
     let userId: String
     let dateCreated: Date?
     let didCompleteOnboarding: Bool?
@@ -38,31 +38,31 @@ struct User {
     static var mocks: [Self] {
         let now = Date()
         return [
-            User(
+            AppUser(
                 userId: "mockUser1",
                 dateCreated: now.addTimeInterval(days: -1),
                 didCompleteOnboarding: true,
                 profileColorHex: "#FF5733"
             ),
-            User(
+            AppUser(
                 userId: "mockUser2",
                 dateCreated: now.addTimeInterval(days: -7),
                 didCompleteOnboarding: false,
                 profileColorHex: "#33A1FF"
             ),
-            User(
+            AppUser(
                 userId: "mockUser3",
                 dateCreated: now.addTimeInterval(days: -30),
                 didCompleteOnboarding: true,
                 profileColorHex: "#B833FF"
             ),
-            User(
+            AppUser(
                 userId: "mockUser4",
                 dateCreated: nil, // No date created
                 didCompleteOnboarding: false,
                 profileColorHex: "#33FF57"
             ),
-            User(
+            AppUser(
                 userId: "mockUser5",
                 dateCreated: now,
                 didCompleteOnboarding: nil,
