@@ -15,8 +15,20 @@ struct AIAvatarChatApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AppView()
+            EnvironmentBuilder {
+                AppView()
+            }
         }
+    }
+}
+
+struct EnvironmentBuilder<Content: View>: View {
+    
+    @ViewBuilder let content: () -> Content
+    
+    var body: some View {
+        content()
+            .environment(\.authService, FirebaseAuthService())
     }
 }
 

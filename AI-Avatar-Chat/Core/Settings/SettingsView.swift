@@ -210,11 +210,6 @@ private extension SettingsView {
     }
 }
 
-#Preview {
-    SettingsView()
-        .environment(AppState())
-}
-
 fileprivate extension View {
     func rowFormatting() -> some View {
         self
@@ -229,4 +224,22 @@ fileprivate extension View {
             .listRowInsets(EdgeInsets(.zero))
             .listRowBackground(Color.clear)
     }
+}
+
+#Preview("Non Auth") {
+    SettingsView()
+        .environment(\.authService, MockAuthService(user: nil))
+        .environment(AppState())
+}
+
+#Preview("Anonymous") {
+    SettingsView()
+        .environment(\.authService, MockAuthService(user: UserAuthInfo.mock(isAnonymous: true)))
+        .environment(AppState())
+}
+
+#Preview("Non Anonymous") {
+    SettingsView()
+        .environment(\.authService, MockAuthService(user: UserAuthInfo.mock(isAnonymous: false)))
+        .environment(AppState())
 }
