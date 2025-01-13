@@ -9,12 +9,15 @@ import SwiftUI
 
 struct SettingsView: View {
     
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.authService) private var authService
     @Environment(AppState.self) private var appState
     
     @State private var isPremium: Bool = false
     @State private var isAnonymousUser: Bool = false
     @State private var showCreateAccountView: Bool = false
+    
+    @State private var showAlert: AppAlert?
     
     var body: some View {
         NavigationStack {
@@ -26,14 +29,27 @@ struct SettingsView: View {
                 applicationSection
             }
             .navigationTitle("Settings")
-            .sheet(isPresented: $showCreateAccountView) {
-                CreateAccountView()
-                    .presentationDetents([.medium])
+            .sheet(
+                isPresented: $showCreateAccountView,
+                onDismiss: {
+                    setAnonymousStatus()
+                },
+                content: {
+                    CreateAccountView()
+                        .presentationDetents([.medium])
+                }
+            )
+            .onAppear {
+                setAnonymousStatus()
             }
+            .showCustomAlert(alert: $showAlert)
         }
     }
-    
-    private var accountSection: some View {
+}
+
+// MARK: Views Section
+private extension SettingsView {
+    var accountSection: some View {
         Section {
             if isAnonymousUser {
                 Text("Save & back-up account")
@@ -55,7 +71,7 @@ struct SettingsView: View {
                 .foregroundStyle(.red)
                 .rowFormatting()
                 .customButton(.highlight(cornerRadius: 12)) {
-                    
+                    onDeleteAccountTapped()
                 }
                 .clearListRowBackground()
         } header: {
@@ -63,7 +79,7 @@ struct SettingsView: View {
         }
     }
     
-    private var purchasesSection: some View {
+    var purchasesSection: some View {
         Section {
             HStack(spacing: 8) {
                 Text("Account status: \(isPremium ? "PREMIUM" : "FREE")")
@@ -86,7 +102,7 @@ struct SettingsView: View {
         }
     }
     
-    private var applicationSection: some View {
+    var applicationSection: some View {
         Section {
             HStack(spacing: 8) {
                 Text("Version")
@@ -139,17 +155,58 @@ struct SettingsView: View {
             }
         }
     }
+}
+
+// MARK: Logic Section
+private extension SettingsView {
+    func setAnonymousStatus() {
+        isAnonymousUser = authService.getAuthenticatedUser()?.isAnonymous ?? true
+    }
     
-    private func onSignOutTapped() {
-        dismiss()
+    func onSignOutTapped() {
         Task {
-            try? await Task.sleep(for: .seconds(0.1))
-            appState.updateViewState(showTabBarView: false)
+            do {
+                try authService.signOut()
+                await dismissView()
+            } catch {
+                showAlert = AppAlert(error: error)
+            }
         }
     }
     
-    private func onCreateAccountTapped() {
+    func onCreateAccountTapped() {
         showCreateAccountView = true
+    }
+    
+    func dismissView() async {
+        dismiss()
+        try? await Task.sleep(for: .seconds(0.1))
+        appState.updateViewState(showTabBarView: false)
+    }
+    
+    func onDeleteAccountTapped() {
+        showAlert = AppAlert(
+            title: "Delete Account",
+            subtitle: "This action is permanent and cannot be undone. Are you sure you want to delete your account?",
+            buttons: {
+                AnyView(
+                    Button("Delete", role: .destructive) {
+                        onDeleteAccountConfirmed()
+                    }
+                )
+            }
+        )
+    }
+    
+    func onDeleteAccountConfirmed() {
+        Task {
+            do {
+                try await authService.deleteAccount()
+                await dismissView()
+            } catch {
+                showAlert = AppAlert(error: error)
+            }
+        }
     }
 }
 

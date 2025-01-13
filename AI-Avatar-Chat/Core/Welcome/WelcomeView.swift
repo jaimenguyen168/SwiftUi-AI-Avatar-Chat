@@ -9,6 +9,7 @@ import SwiftUI
 
 struct WelcomeView: View {
     
+    @Environment(AppState.self) private var root
     @State var imageUrl = Constants.randomImageUrl
     @State private var showSignInAccountView: Bool = false
     
@@ -20,7 +21,7 @@ struct WelcomeView: View {
                 
                 titleSection
                     .padding(.top, 24)
-               
+                
                 onboardingButtons
                     .padding(16)
                 
@@ -30,13 +31,18 @@ struct WelcomeView: View {
         .sheet(isPresented: $showSignInAccountView) {
             CreateAccountView(
                 title: "Sign In",
-                subtitle: "Connect to an existing account"
+                subtitle: "Connect to an existing account",
+                onDidSignIn: { isNewUser in
+                    handleDidSignIn(isNewUser: isNewUser)
+                }
             )
             .presentationDetents([.medium])
         }
     }
-    
-    private var titleSection: some View {
+}
+
+private extension WelcomeView {
+    var titleSection: some View {
         VStack(spacing: 8) {
             Text("AI Avatar Chat 👽")
                 .font(.largeTitle)
@@ -48,7 +54,7 @@ struct WelcomeView: View {
         }
     }
     
-    private var onboardingButtons: some View {
+    var onboardingButtons: some View {
         VStack {
             NavigationLink {
                 OnboardingIntroView()
@@ -68,7 +74,7 @@ struct WelcomeView: View {
         }
     }
     
-    private var termsAndPolicyLink: some View {
+    var termsAndPolicyLink: some View {
         HStack(spacing: 8) {
             Link(destination: URL(string: Constants.termsOfServiceUrl)!) {
                 Text("Terms of Service")
@@ -83,9 +89,19 @@ struct WelcomeView: View {
             }
         }
     }
-    
-    private func onSignInTapped() {
+}
+
+private extension WelcomeView {
+    func onSignInTapped() {
         showSignInAccountView = true
+    }
+    
+    func handleDidSignIn(isNewUser: Bool) {
+        if isNewUser {
+            
+        } else {
+            root.updateViewState(showTabBarView: true)
+        }
     }
 }
 

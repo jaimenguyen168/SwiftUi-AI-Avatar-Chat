@@ -26,6 +26,13 @@ struct AppView: View {
         .task {
             await checkUserAuthentication()
         }
+        .onChange(of: appState.showTabBar) { _, showTabBar in
+            if !showTabBar {
+                Task {
+                    await checkUserAuthentication()
+                }
+            }
+        }
     }
 }
 

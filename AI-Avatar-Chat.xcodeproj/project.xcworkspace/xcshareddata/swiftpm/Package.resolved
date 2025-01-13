@@ -1,5 +1,5 @@
 {
-  "originHash" : "b9efad2f5627791c01b7cdaae8013293b4d8b8c729799cb89c350a1c630b9486",
+  "originHash" : "ef9264865a56c0036ea112a5ee2b46937d2adb53c47d54f84b05776d41f68c8d",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -125,6 +125,15 @@
       "state" : {
         "revision" : "451c6dfd5ecec2cf626d1d9ca81c2d4a60355172",
         "version" : "3.1.3"
+      }
+    },
+    {
+      "identity" : "signinappleasync",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftfulThinking/SignInAppleAsync.git",
+      "state" : {
+        "revision" : "ae49d56efb61e6a05a8a79b957235f7d14abe359",
+        "version" : "1.0.0"
       }
     },
     {
