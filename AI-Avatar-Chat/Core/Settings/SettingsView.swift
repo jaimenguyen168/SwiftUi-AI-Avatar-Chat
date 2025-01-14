@@ -10,7 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.authService) private var authService
+    @Environment(AuthManager.self) private var authManager
     @Environment(AppState.self) private var appState
     
     @State private var isPremium: Bool = false
@@ -160,13 +160,13 @@ private extension SettingsView {
 // MARK: Logic Section
 private extension SettingsView {
     func setAnonymousStatus() {
-        isAnonymousUser = authService.getAuthenticatedUser()?.isAnonymous ?? true
+        isAnonymousUser = authManager.authUser?.isAnonymous == true
     }
     
     func onSignOutTapped() {
         Task {
             do {
-                try authService.signOut()
+                try authManager.signOut()
                 await dismissView()
             } catch {
                 showAlert = AppAlert(error: error)
@@ -201,7 +201,7 @@ private extension SettingsView {
     func onDeleteAccountConfirmed() {
         Task {
             do {
-                try await authService.deleteAccount()
+                try await authManager.deleteAccount()
                 await dismissView()
             } catch {
                 showAlert = AppAlert(error: error)
@@ -228,18 +228,19 @@ fileprivate extension View {
 
 #Preview("Non Auth") {
     SettingsView()
-        .environment(\.authService, MockAuthService(user: nil))
+//        .environment(\.authService, MockAuthService(user: nil))
+        .environment(AuthManager(authService: MockAuthService(user: nil)))
         .environment(AppState())
 }
 
 #Preview("Anonymous") {
     SettingsView()
-        .environment(\.authService, MockAuthService(user: UserAuthInfo.mock(isAnonymous: true)))
+        .environment(AuthManager(authService: MockAuthService(user: UserAuthInfo.mock(isAnonymous: true))))
         .environment(AppState())
 }
 
 #Preview("Non Anonymous") {
     SettingsView()
-        .environment(\.authService, MockAuthService(user: UserAuthInfo.mock(isAnonymous: false)))
+        .environment(AuthManager(authService: MockAuthService(user: UserAuthInfo.mock(isAnonymous: false))))
         .environment(AppState())
 }

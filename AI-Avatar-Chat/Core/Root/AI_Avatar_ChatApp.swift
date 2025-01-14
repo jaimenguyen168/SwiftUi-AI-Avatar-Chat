@@ -28,7 +28,8 @@ struct EnvironmentBuilder<Content: View>: View {
     
     var body: some View {
         content()
-            .environment(\.authService, FirebaseAuthService())
+            .environment(AuthManager(authService: FirebaseAuthService()))
+//            .environment(\.authService, FirebaseAuthService())
     }
 }
 
