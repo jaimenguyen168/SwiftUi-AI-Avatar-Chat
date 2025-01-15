@@ -66,12 +66,12 @@ private extension AppView {
 
 #Preview("AppView - Onboarding") {
     AppView(appState: AppState(showTabBar: false))
-        .environment(AuthManager(authService: MockAuthService(user: nil)))
-        .environment(UserManager(userService: FirebaseUserService()))
+        .environment(AuthManager(authService: MockAuthService(authUser: nil)))
+        .environment(UserManager(userService: MockUserService(user: nil)))
 }
 
 #Preview("AppView - Tabbar") {
     AppView(appState: AppState(showTabBar: true))
-        .environment(AuthManager(authService: MockAuthService(user: nil)))
-        .environment(UserManager(userService: FirebaseUserService()))
+        .environment(AuthManager(authService: MockAuthService(authUser: .mock())))
+        .environment(UserManager(userService: MockUserService(user: .mock)))
 }

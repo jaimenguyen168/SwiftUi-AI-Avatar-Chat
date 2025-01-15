@@ -10,8 +10,8 @@ struct MockAuthService: AuthService {
     
     let currentUser: UserAuthInfo?
     
-    init(user: UserAuthInfo? = nil) {
-        currentUser = user
+    init(authUser: UserAuthInfo? = nil) {
+        currentUser = authUser
     }
     
     func addAuthenticatedUserListener(onListenerAttached: (any NSObjectProtocol) -> Void)

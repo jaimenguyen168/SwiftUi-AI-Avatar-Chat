@@ -42,21 +42,34 @@ extension Color {
         return Color(.sRGB, red: r, green: g, blue: b, opacity: a)
     }
     
-    func toHex(includeAlpha: Bool = false) -> String? {
-        let components = self.cgColor?.components
-        let r, g, b, a: Int // swiftlint:disable:this identifier_name
-        
-        guard let components = components else { return nil }
-        
-        r = Int(components[0] * 255)
-        g = Int(components[1] * 255)
-        b = Int(components[2] * 255)
-        a = components.count >= 4 ? Int(components[3] * 255) : 255
-        
-        if includeAlpha {
-            return String(format: "#%02X%02X%02X%02X", r, g, b, a)
+    func asHex(alpha: Bool = false) -> String {
+        // Convert Color to UIColor
+        let uiColor = UIColor(self)
+
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alphaValue: CGFloat = 0
+
+        // Use guard to ensure all components can be extracted
+        guard uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alphaValue) else {
+            // Return a default color (black or transparent) if unable to extract components
+            return alpha ? "#00000000": "#000000"
+        }
+
+        if alpha {
+            // Include alpha component in the hex string
+            return String(format: "#%02lX%02lX%02lX%02lX",
+                          lroundf(Float(alphaValue) * 255),
+                          lroundf(Float(red) * 255),
+                          lroundf(Float(green) * 255),
+                          lroundf(Float(blue) * 255))
         } else {
-            return String(format: "#%02X%02X%02X", r, g, b)
+            // Exclude alpha component from the hex string
+            return String(format: "#%02lX%02lX%02lX",
+                          lroundf(Float(red) * 255),
+                          lroundf(Float(green) * 255),
+                          lroundf(Float(blue) * 255))
         }
     }
 }

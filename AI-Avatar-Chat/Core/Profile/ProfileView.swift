@@ -9,9 +9,11 @@ import SwiftUI
 
 struct ProfileView: View {
     
+    @Environment(UserManager.self) private var userManager
+    
     @State private var showSettingsView: Bool = false
     @State private var showCreateAvatarView: Bool = false
-    @State private var currentUser: AppUser = .mock
+    @State private var currentUser: AppUser?
     @State private var myAvatars: [Avatar] = []
     @State private var isLoading: Bool = true
     
@@ -50,7 +52,7 @@ private extension ProfileView {
         Section {
             ZStack {
                 Circle()
-                    .fill(currentUser.profileColorSwift ?? .accent)
+                    .fill(currentUser?.profileColorSwift ?? .accent)
             }
             .frame(width: 100, height: 100)
             .frame(maxWidth: .infinity)
@@ -118,6 +120,8 @@ private extension ProfileView {
 // Logic section
 private extension ProfileView {
     func loadData() async {
+        self.currentUser = userManager.currentUser
+        
         try? await Task.sleep(for: .seconds(3))
         isLoading = false
         myAvatars = Avatar.mocks
@@ -146,5 +150,6 @@ private extension ProfileView {
         ProfileView()
             .navigationTitle(TabBarItem.profile.rawValue.capitalized)
             .environment(AppState())
+            .environment(UserManager(userService: MockUserService(user: .mock)))
     }
 }

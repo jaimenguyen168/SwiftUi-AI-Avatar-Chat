@@ -11,6 +11,7 @@ struct SettingsView: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var authManager
+    @Environment(UserManager.self) private var userManager
     @Environment(AppState.self) private var appState
     
     @State private var isPremium: Bool = false
@@ -167,6 +168,7 @@ private extension SettingsView {
         Task {
             do {
                 try authManager.signOut()
+                userManager.signOut()
                 await dismissView()
             } catch {
                 showAlert = AppAlert(error: error)
@@ -202,6 +204,8 @@ private extension SettingsView {
         Task {
             do {
                 try await authManager.deleteAccount()
+                try await userManager.deleteCurrentUser()
+                
                 await dismissView()
             } catch {
                 showAlert = AppAlert(error: error)
@@ -229,18 +233,21 @@ fileprivate extension View {
 #Preview("Non Auth") {
     SettingsView()
 //        .environment(\.authService, MockAuthService(user: nil))
-        .environment(AuthManager(authService: MockAuthService(user: nil)))
+        .environment(AuthManager(authService: MockAuthService(authUser: nil)))
+        .environment(UserManager(userService: MockUserService(user: nil)))
         .environment(AppState())
 }
 
 #Preview("Anonymous") {
     SettingsView()
-        .environment(AuthManager(authService: MockAuthService(user: UserAuthInfo.mock(isAnonymous: true))))
+        .environment(AuthManager(authService: MockAuthService(authUser: UserAuthInfo.mock(isAnonymous: true))))
+        .environment(UserManager(userService: MockUserService(user: nil)))
         .environment(AppState())
 }
 
 #Preview("Non Anonymous") {
     SettingsView()
-        .environment(AuthManager(authService: MockAuthService(user: UserAuthInfo.mock(isAnonymous: false))))
+        .environment(AuthManager(authService: MockAuthService(authUser: UserAuthInfo.mock(isAnonymous: false))))
+        .environment(UserManager(userService: MockUserService(user: .mock)))
         .environment(AppState())
 }
