@@ -10,6 +10,7 @@ import SwiftUI
 struct CreateAccountView: View {
     
     @Environment(AuthManager.self) private var authManager
+    @Environment(UserManager.self) private var userManager
     @Environment(\.dismiss) private var dismiss
     var title: String = "Create Account?"
     var subtitle: String = "Don't lose your data! Connect to an SSO provider to save your account information."
@@ -49,11 +50,14 @@ private extension CreateAccountView {
         Task {
             do {
                 let result = try await authManager.signInWithApple()
+                print("DEBUG: Did sign in with Apple \(result.user.uid)")
+                
+                try await userManager.login(userAuth: result.user, isNewUser: result.isNewUser)
+                
                 onDidSignIn?(result.isNewUser)
-                print("DEBUG: Did sign in with Apple")
                 dismiss()
             } catch {
-                print("DEBUG: \(error.localizedDescription)")
+                print("DEBUG: Failed to sign in with Apple \(error.localizedDescription)")
             }
         }
     }
@@ -62,4 +66,5 @@ private extension CreateAccountView {
 #Preview {
     CreateAccountView()
         .environment(AuthManager(authService: MockAuthService(user: nil)))
+        .environment(UserManager(userService: FirebaseUserService()))
 }

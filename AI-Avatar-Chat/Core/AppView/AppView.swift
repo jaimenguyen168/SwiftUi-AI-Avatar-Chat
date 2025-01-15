@@ -11,6 +11,7 @@ struct AppView: View {
     
     @State var appState: AppState = .init()
     @Environment(AuthManager.self) private var authManager
+    @Environment(UserManager.self) private var userManager
     
     var body: some View {
         AppViewBuilder(
@@ -40,12 +41,24 @@ private extension AppView {
     func checkUserAuthentication() async {
         if let user = authManager.authUser {
             print("User authenticated: \(user.uid)")
+            
+            do {
+                try await userManager.login(userAuth: user, isNewUser: false)
+            } catch {
+                print("DEBUG: failed to log in for existing user \(error.localizedDescription)")
+                try? await Task.sleep(for: .seconds(2))
+                await checkUserAuthentication()
+            }
         } else {
             do {
                 let result = try await authManager.signInAnonymously()
                 print("Sign in anonymously: \(result.user.uid)")
+                
+                try await userManager.login(userAuth: result.user, isNewUser: result.isNewUser)
             } catch {
-                print("DEBUG: \(error)")
+                print("DEBUG: failed to sign in anonymously \(error)")
+                try? await Task.sleep(for: .seconds(2))
+                await checkUserAuthentication()
             }
         }
     }
@@ -54,9 +67,11 @@ private extension AppView {
 #Preview("AppView - Onboarding") {
     AppView(appState: AppState(showTabBar: false))
         .environment(AuthManager(authService: MockAuthService(user: nil)))
+        .environment(UserManager(userService: FirebaseUserService()))
 }
 
 #Preview("AppView - Tabbar") {
     AppView(appState: AppState(showTabBar: true))
         .environment(AuthManager(authService: MockAuthService(user: nil)))
+        .environment(UserManager(userService: FirebaseUserService()))
 }

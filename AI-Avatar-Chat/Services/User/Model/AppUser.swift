@@ -8,22 +8,58 @@
 import Foundation
 import SwiftUI
 
-struct AppUser {
+struct AppUser: Codable {
+    
     let userId: String
-    let dateCreated: Date?
+    let email: String?
+    let isAnonymous: Bool?
+    let creationDate: Date?
+    let lastSignInDate: Date?
     let didCompleteOnboarding: Bool?
     let profileColorHex: String?
     
+    let creationVersion: String?
+    
     init(
         userId: String,
-        dateCreated: Date? = nil,
+        email: String? = nil,
+        isAnonymous: Bool? = nil,
+        creationDate: Date? = nil,
+        lastSignInDate: Date? = nil,
         didCompleteOnboarding: Bool? = nil,
-        profileColorHex: String? = nil
+        profileColorHex: String? = nil,
+        creationVersion: String? = nil
     ) {
         self.userId = userId
-        self.dateCreated = dateCreated
+        self.email = email
+        self.isAnonymous = isAnonymous
+        self.creationDate = creationDate
+        self.lastSignInDate = lastSignInDate
         self.didCompleteOnboarding = didCompleteOnboarding
         self.profileColorHex = profileColorHex
+        self.creationVersion = creationVersion
+    }
+    
+    init(authUser: UserAuthInfo, creationVersion: String?) {
+        self.init(
+            userId: authUser.uid,
+            email: authUser.email,
+            isAnonymous: authUser.isAnonymous,
+            creationDate: authUser.creationDate,
+            lastSignInDate: authUser.lastSignInDate,
+            creationVersion: creationVersion
+        )
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case email = "email"
+        case isAnonymous = "is_anonymous"
+        case creationDate = "creation_date"
+        case lastSignInDate = "last_sign_in_date"
+        case didCompleteOnboarding = "did_complete_onboarding"
+        case profileColorHex = "profile_color_hex"
+        case creationVersion = "creation_version"
     }
     
     var profileColorSwift: Color? {
@@ -40,31 +76,31 @@ struct AppUser {
         return [
             AppUser(
                 userId: "mockUser1",
-                dateCreated: now.addTimeInterval(days: -1),
+                creationDate: now.addTimeInterval(days: -1),
                 didCompleteOnboarding: true,
                 profileColorHex: "#FF5733"
             ),
             AppUser(
                 userId: "mockUser2",
-                dateCreated: now.addTimeInterval(days: -7),
+                creationDate: now.addTimeInterval(days: -7),
                 didCompleteOnboarding: false,
                 profileColorHex: "#33A1FF"
             ),
             AppUser(
                 userId: "mockUser3",
-                dateCreated: now.addTimeInterval(days: -30),
+                creationDate: now.addTimeInterval(days: -30),
                 didCompleteOnboarding: true,
                 profileColorHex: "#B833FF"
             ),
             AppUser(
                 userId: "mockUser4",
-                dateCreated: nil, // No date created
+                creationDate: nil, // No date created
                 didCompleteOnboarding: false,
                 profileColorHex: "#33FF57"
             ),
             AppUser(
                 userId: "mockUser5",
-                dateCreated: now,
+                creationDate: now,
                 didCompleteOnboarding: nil,
                 profileColorHex: "#FFFFFF"
             )

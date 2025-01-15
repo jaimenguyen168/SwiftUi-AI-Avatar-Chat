@@ -23,8 +23,7 @@ class AuthManager {
     
     private func addAuthListeners() {
         Task {
-            for await value in authService.addAuthenticatedUserListener(onListenerAttached: {
-                listener in
+            for await value in authService.addAuthenticatedUserListener(onListenerAttached: { listener in
                 self.authListener = listener
             }) {
                 self.authUser = value

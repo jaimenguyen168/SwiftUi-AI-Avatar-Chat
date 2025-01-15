@@ -21,4 +21,3 @@ protocol AuthService: Sendable {
 //    @Entry var authService: AuthService = MockAuthService()
 //}
 // swiftlint:enable comment_spacing
-
