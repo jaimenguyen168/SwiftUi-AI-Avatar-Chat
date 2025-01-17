@@ -234,20 +234,20 @@ fileprivate extension View {
     SettingsView()
 //        .environment(\.authService, MockAuthService(user: nil))
         .environment(AuthManager(authService: MockAuthService(authUser: nil)))
-        .environment(UserManager(userService: MockUserService(user: nil)))
+        .environment(UserManager(userServices: MockUserServices(user: nil)))
         .environment(AppState())
 }
 
 #Preview("Anonymous") {
     SettingsView()
         .environment(AuthManager(authService: MockAuthService(authUser: UserAuthInfo.mock(isAnonymous: true))))
-        .environment(UserManager(userService: MockUserService(user: nil)))
+        .environment(UserManager(userServices: MockUserServices(user: .mock)))
         .environment(AppState())
 }
 
 #Preview("Non Anonymous") {
     SettingsView()
         .environment(AuthManager(authService: MockAuthService(authUser: UserAuthInfo.mock(isAnonymous: false))))
-        .environment(UserManager(userService: MockUserService(user: .mock)))
+        .environment(UserManager(userServices: MockUserServices(user: .mock)))
         .environment(AppState())
 }

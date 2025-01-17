@@ -66,5 +66,5 @@ private extension CreateAccountView {
 #Preview {
     CreateAccountView()
         .environment(AuthManager(authService: MockAuthService(authUser: nil)))
-        .environment(UserManager(userService: FirebaseUserService()))
+        .environment(UserManager(userServices: MockUserServices(user: nil)))
 }

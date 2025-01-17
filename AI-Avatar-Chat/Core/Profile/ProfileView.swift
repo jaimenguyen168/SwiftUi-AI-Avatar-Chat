@@ -150,6 +150,6 @@ private extension ProfileView {
         ProfileView()
             .navigationTitle(TabBarItem.profile.rawValue.capitalized)
             .environment(AppState())
-            .environment(UserManager(userService: MockUserService(user: .mock)))
+            .environment(UserManager(userServices: MockUserServices(user: .mock)))
     }
 }
