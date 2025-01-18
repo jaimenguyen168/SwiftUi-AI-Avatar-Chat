@@ -16,16 +16,16 @@ struct AIAvatarChatApp: App {
     var body: some Scene {
         WindowGroup {
             AppView()
-                .environment(delegate.authManager)
-                .environment(delegate.userManager)
+                .environment(delegate.dependencies.authManager)
+                .environment(delegate.dependencies.userManager)
+                .environment(delegate.dependencies.aiManager)
         }
     }
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     
-    var authManager: AuthManager!
-    var userManager: UserManager!
+    var dependencies: Dependency!
     
     func application(
         _ application: UIApplication,
@@ -34,11 +34,23 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp
             .configure()
         
-        self.authManager = AuthManager(authService: FirebaseAuthService())
-        self.userManager = UserManager(userServices: ProductionUserServices())
+        dependencies = Dependency()
 
     return true
   }
+}
+
+@MainActor
+struct Dependency {
+    let authManager: AuthManager
+    let userManager: UserManager
+    let aiManager: AIManager
+    
+    init() {
+        self.authManager = AuthManager(authService: FirebaseAuthService())
+        self.userManager = UserManager(userServices: ProductionUserServices())
+        self.aiManager = AIManager(aiService: OpenAIService())
+    }
 }
 
 // swiftlint:disable all

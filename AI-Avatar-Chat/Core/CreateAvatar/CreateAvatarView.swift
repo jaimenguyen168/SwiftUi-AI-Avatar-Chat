@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CreateAvatarView: View {
 
+    @Environment(AIManager.self) private var aiManager
     @Environment(\.dismiss) var dismiss
     @State private var avatarName = ""
     @State private var character: Character = .default
@@ -151,8 +152,17 @@ struct CreateAvatarView: View {
         isGenerating = true
         
         Task {
-            try? await Task.sleep(for: .seconds(2))
-            generatedImage = UIImage(systemName: "person.fill")
+            do {
+                let prompt = AvatarDescriptionBuilder(
+                    character: character,
+                    action: action,
+                    location: location
+                ).description
+                
+                generatedImage = try await aiManager.generateImage(prompt: prompt)
+            } catch {
+                print("DEBUG: AI generation failed with error \(error.localizedDescription)")
+            }
             
             isGenerating = false
         }
@@ -171,4 +181,5 @@ struct CreateAvatarView: View {
 
 #Preview {
     CreateAvatarView()
+        .environment(AIManager(aiService: MockAIService()))
 }
