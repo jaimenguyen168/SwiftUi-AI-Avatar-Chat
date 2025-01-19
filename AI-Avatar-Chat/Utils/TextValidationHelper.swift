@@ -22,8 +22,7 @@ enum TextValidationError: LocalizedError {
 }
 
 struct TextValidationHelper {
-    static func validateText(text: String) throws {
-        let minimumLength = 3
+    static func validateText(text: String, minimumLength: Int = 3) throws {
         
         guard text.count >= minimumLength else { throw TextValidationError.notEnoughCharacters(min: minimumLength) }
         

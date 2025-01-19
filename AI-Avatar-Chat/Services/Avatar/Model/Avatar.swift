@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct Avatar: Hashable, Identifiable {
+struct Avatar: Hashable, Identifiable, Codable {
     let id: String
     let name: String?
     let character: Character?
     let action: Action?
     let location: Location?
-    let profileImageUrl: String?
+    private(set) var profileImageUrl: String?
     
     let authodId: String?
     let dateCreated: Date
@@ -40,6 +40,21 @@ struct Avatar: Hashable, Identifiable {
         self.profileImageUrl = profileImageUrl
         self.authodId = authodId
         self.dateCreated = dateCreated
+    }
+    
+    mutating func updateProfileImage(image: String) {
+        profileImageUrl = image
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "avatar_id"
+        case name
+        case character
+        case action
+        case location
+        case profileImageUrl = "profile_image_url"
+        case authodId = "author_id"
+        case dateCreated = "date_created"
     }
     
     static var mock: Avatar {

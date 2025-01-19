@@ -10,6 +10,9 @@ import SwiftUI
 struct CreateAvatarView: View {
 
     @Environment(AIManager.self) private var aiManager
+    @Environment(AuthManager.self) private var authManager
+    @Environment(AvatarManager.self) private var avatarManager
+    
     @Environment(\.dismiss) var dismiss
     @State private var avatarName = ""
     @State private var character: Character = .default
@@ -19,6 +22,8 @@ struct CreateAvatarView: View {
     @State private var isGenerating = false
     @State private var generatedImage: UIImage?
     @State private var isSaving = false
+    
+    @State private var showAlert: AppAlert?
     
     var body: some View {
         NavigationStack {
@@ -40,6 +45,7 @@ struct CreateAvatarView: View {
                     backButton
                 }
             }
+            .showCustomAlert(alert: $showAlert)
         }
     }
     
@@ -161,7 +167,7 @@ struct CreateAvatarView: View {
                 
                 generatedImage = try await aiManager.generateImage(prompt: prompt)
             } catch {
-                print("DEBUG: AI generation failed with error \(error.localizedDescription)")
+                showAlert = AppAlert(error: error)
             }
             
             isGenerating = false
@@ -169,11 +175,35 @@ struct CreateAvatarView: View {
     }
     
     private func onSavePress() {
+        guard let generatedImage else { return }
         isSaving = true
         
         Task {
-            try? await Task.sleep(for: .seconds(2))
-            dismiss()
+            do {
+                try TextValidationHelper.validateText(text: avatarName, minimumLength: 4)
+                let uid = try authManager.getAuthId()
+                
+                let avatar = Avatar(
+                    avatarId: UUID().uuidString,
+                    name: avatarName,
+                    character: character,
+                    action: action,
+                    location: location,
+                    profileImageUrl: nil,
+                    authodId: uid,
+                    dateCreated: .now
+                )
+                
+                try await avatarManager.createAvatar(
+                    avatar: avatar,
+                    image: generatedImage
+                )
+                
+                dismiss()
+            } catch {
+                print("DEBUG: \(error.localizedDescription)")
+            }
+            
             isSaving = false
         }
     }
@@ -182,4 +212,6 @@ struct CreateAvatarView: View {
 #Preview {
     CreateAvatarView()
         .environment(AIManager(aiService: MockAIService()))
+        .environment(AuthManager(authService: MockAuthService()))
+        .environment(AvatarManager(avatarService: MockAvatarService()))
 }
