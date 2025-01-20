@@ -11,6 +11,9 @@ struct ChatView: View {
     
     var avatar: Avatar = .mock
     
+    @Environment(AvatarManager.self) private var avatarManager
+    @State private var currentAvatar: Avatar?
+    
     @State private var chatMessages: [ChatMessage] = ChatMessage.mockConversation
     @State private var currentUser: AppUser? = .mock
     
@@ -46,6 +49,9 @@ struct ChatView: View {
         .showCustomAlert(alert: $showAlert)
         .showModal(showModal: $showProfileModal) {
             profileModal(avatar: avatar)
+        }
+        .task {
+            await loadAvatar()
         }
     }
 }
@@ -127,6 +133,17 @@ private extension ChatView {
 }
 
 private extension ChatView {
+    // may not needed
+    func loadAvatar() async {
+        do {
+            currentAvatar = try await avatarManager.getAvatarById(avatar.avatarId)
+            
+            try avatarManager.addRecentAvatar(avatar)
+        } catch {
+            print("DEBUG: failed to load avatar for chat with error \(error.localizedDescription)")
+        }
+    }
+    
     func onSendMessagePress() {
         guard let currentUser else { return }
         
@@ -175,5 +192,6 @@ private extension ChatView {
 #Preview {
     NavigationStack {
         ChatView()
+            .environment(AvatarManager(avatarService: MockAvatarService()))
     }
 }

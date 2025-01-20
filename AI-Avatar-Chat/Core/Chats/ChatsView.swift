@@ -9,14 +9,16 @@ import SwiftUI
 
 struct ChatsView: View {
     
+    @Environment(AvatarManager.self) private var avatarManager
+    
     @State private var chats: [Chat] = Chat.mocks
-    @State private var avatars: [Avatar] = Avatar.mocks
+    @State private var recentAvatars: [Avatar]?
     @State private var option: NavigationCoreOption?
     
     var body: some View {
         NavigationStack {
             List {
-                if !avatars.isEmpty {
+                if let recentAvatars, !recentAvatars.isEmpty {
                     recentsSection
                 }
                 
@@ -25,6 +27,9 @@ struct ChatsView: View {
             .listStyle(.grouped)
             .navigationTitle("Chats")
             .navigationDestinationCoreOption(option: $option)
+            .onAppear {
+                loadRecentAvatars()
+            }
         }
     }
 }
@@ -34,7 +39,7 @@ private extension ChatsView {
         Section {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 8) {
-                    ForEach(avatars) { avatar in
+                    ForEach(recentAvatars ?? []) { avatar in
                         VStack(spacing: 8) {
                             ZStack {
                                 if let imagename = avatar.profileImageUrl {
@@ -110,6 +115,14 @@ private extension ChatsView {
 }
 
 private extension ChatsView {
+    func loadRecentAvatars() {
+        do {
+            recentAvatars = try avatarManager.getRecentAvatars()
+        } catch {
+            print("DEBUG: failed to fetch recents with error \(error.localizedDescription)")
+        }
+    }
+    
     func onAvatarPress(_ avatar: Avatar) {
         option = .chat(avatar: avatar)
     }
@@ -122,4 +135,5 @@ private extension ChatsView {
 #Preview {
     ChatsView()
         .navigationTitle(TabBarItem.chats.rawValue.capitalized)
+        .environment(AvatarManager(avatarService: MockAvatarService()))
 }

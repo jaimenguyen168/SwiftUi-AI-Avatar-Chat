@@ -8,7 +8,7 @@
 import SwiftUI
 import FirebaseFirestore
 
-struct FirebaseAvatarService: AvatarService {
+struct FirebaseAvatarService: RemoteAvatarService {
     
     var collection: CollectionReference {
         Firestore.firestore().collection("avatars")
@@ -51,5 +51,10 @@ struct FirebaseAvatarService: AvatarService {
             .whereField(Avatar.CodingKeys.authodId.rawValue, isEqualTo: authorId)
             .limit(to: 100)
             .getAllDocuments()
+    }
+    
+    func getAvatar(id: String) async throws -> Avatar {
+        try await collection
+            .getDocument(id: id)
     }
 }
