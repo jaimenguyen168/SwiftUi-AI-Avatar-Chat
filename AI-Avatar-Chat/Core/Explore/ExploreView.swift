@@ -9,9 +9,11 @@ import SwiftUI
 
 struct ExploreView: View {
     
-    @State private var featuredAvatars: [Avatar] = Avatar.mocks
+    @Environment(AvatarManager.self) private var avatarManager
+    @State private var featuredAvatars: [Avatar] = []
+    @State private var popularAvatars: [Avatar] = []
+    
     @State private var categories: [Character] = Character.allCases
-    @State private var popularAvatars: [Avatar] = Avatar.mocks
     let carouselWidth = customWidth(percent: 90)
     
     @State private var option: NavigationCoreOption?
@@ -19,15 +21,33 @@ struct ExploreView: View {
     var body: some View {
         NavigationStack {
             List {
-                featuredSection
+                if featuredAvatars.isEmpty && popularAvatars.isEmpty {
+                    
+                    ProgressView()
+                        .formatListRow()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 500)
+                        .scaleEffect(1.5)
+                }
                 
-                categorySection
+                if !featuredAvatars.isEmpty {
+                    featuredSection
+                }
                 
-                popularSection
+                if !popularAvatars.isEmpty {
+                    categorySection
+                    popularSection
+                }
             }
             .listStyle(.grouped)
             .navigationTitle("Explore")
             .navigationDestinationCoreOption(option: $option)
+            .task {
+                await loadFeaturedAvatars()
+            }
+            .task {
+                await loadPopularAvatars()
+            }
         }
     }
 }
@@ -117,6 +137,26 @@ private extension ExploreView {
 
 // Logic sections
 private extension ExploreView {
+    func loadFeaturedAvatars() async {
+        guard featuredAvatars.isEmpty else { return }
+        
+        do {
+            featuredAvatars = try await avatarManager.getFeaturedAvatars()
+        } catch {
+            print("DEBUG: Loading featured avatars failed with error \(error.localizedDescription)")
+        }
+    }
+    
+    func loadPopularAvatars() async {
+        guard popularAvatars.isEmpty else { return }
+        
+        do {
+            popularAvatars = try await avatarManager.getPopularAvatars()
+        } catch {
+            print("DEBUG: Loading popular avatars failed with error \(error.localizedDescription)")
+        }
+    }
+    
     func onAvatarPress(_ avatar: Avatar) {
         option = .chat(avatar: avatar)
     }
@@ -136,4 +176,5 @@ private extension ExploreView {
 #Preview {
     ExploreView()
         .navigationTitle(TabBarItem.explore.rawValue.capitalized)
+        .environment(AvatarManager(avatarService: FirebaseAvatarService()))
 }

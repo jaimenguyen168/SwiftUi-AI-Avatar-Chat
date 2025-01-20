@@ -20,7 +20,7 @@ struct FirebaseImageUploadService {
         }
         
         // upload
-        let _ = try await saveImage(data: data, path: path)
+        _ = try await saveImage(data: data, path: path)
         
         // download url
         return try await imageReference(path: path).downloadURL()

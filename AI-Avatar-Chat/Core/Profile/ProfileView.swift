@@ -10,6 +10,7 @@ import SwiftUI
 struct ProfileView: View {
     
     @Environment(UserManager.self) private var userManager
+    @Environment(AvatarManager.self) private var avatarManager
     
     @State private var showSettingsView: Bool = false
     @State private var showCreateAvatarView: Bool = false
@@ -122,9 +123,14 @@ private extension ProfileView {
     func loadData() async {
         self.currentUser = userManager.currentUser
         
-        try? await Task.sleep(for: .seconds(3))
+        do {
+            let uid = currentUser?.userId ?? ""
+            myAvatars = try await avatarManager.getAvatarsForAuthor(authorId: uid)
+        } catch {
+            print("DEBUG: Failed to load avatars for profile with error \(error.localizedDescription)")
+        }
+        
         isLoading = false
-        myAvatars = Avatar.mocks
     }
     
     func onNewAvatarButtonTap() {
@@ -151,5 +157,6 @@ private extension ProfileView {
             .navigationTitle(TabBarItem.profile.rawValue.capitalized)
             .environment(AppState())
             .environment(UserManager(userServices: MockUserServices(user: .mock)))
+            .environment(AvatarManager(avatarService: MockAvatarService()))
     }
 }
