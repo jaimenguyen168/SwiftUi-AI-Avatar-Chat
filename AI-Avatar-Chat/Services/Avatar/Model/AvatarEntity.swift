@@ -19,6 +19,7 @@ class AvatarEntity {
     var profileImageUrl: String?
     var authodId: String?
     var dateCreated: Date
+    var viewCount: Int?
     
     var dateAdded: Date
     
@@ -31,6 +32,7 @@ class AvatarEntity {
         self.profileImageUrl = model.profileImageUrl
         self.authodId = model.authodId
         self.dateCreated = model.dateCreated
+        self.viewCount = model.viewCount
         
         self.dateAdded = .now
     }
@@ -44,7 +46,8 @@ class AvatarEntity {
             location: location,
             profileImageUrl: profileImageUrl,
             authodId: authodId,
-            dateCreated: dateCreated
+            dateCreated: dateCreated,
+            viewCount: viewCount
         )
     }
 }

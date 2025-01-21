@@ -82,7 +82,7 @@ private extension ExploreView {
                 ScrollView(.horizontal) {
                     HStack(spacing: 12) {
                         ForEach(categories) { category in
-                            let imageName = popularAvatars.first(where: {
+                            let imageName = popularAvatars.last(where: {
                                 $0.character == category
                             })?.profileImageUrl
                             
@@ -115,7 +115,7 @@ private extension ExploreView {
     
     var popularSection: some View {
         Section {
-            ForEach(popularAvatars, id: \.self) { avatar in
+            ForEach(popularAvatars.first(upTo: 5) ?? [], id: \.self) { avatar in
                 CustomListCellView(
                     title: avatar.name,
                     subtitle: avatar.description,

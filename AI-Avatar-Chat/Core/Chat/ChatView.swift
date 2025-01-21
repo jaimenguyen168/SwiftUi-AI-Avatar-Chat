@@ -138,7 +138,7 @@ private extension ChatView {
         do {
             currentAvatar = try await avatarManager.getAvatarById(avatar.avatarId)
             
-            try avatarManager.addRecentAvatar(avatar)
+            try? await avatarManager.addRecentAvatar(avatar)
         } catch {
             print("DEBUG: failed to load avatar for chat with error \(error.localizedDescription)")
         }

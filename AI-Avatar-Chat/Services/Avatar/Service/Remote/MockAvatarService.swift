@@ -37,4 +37,8 @@ struct MockAvatarService: RemoteAvatarService {
         try await Task.sleep(for: .seconds(1))
         return Avatar.mocks.first(where: { $0.avatarId == id }) ?? .mock
     }
+    
+    func incrementAvatarClickCount(avatarId: String) async throws {
+        
+    }
 }

@@ -21,6 +21,8 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
     let authodId: String?
     let dateCreated: Date
     
+    let viewCount: Int?
+    
     var description: String {
         AvatarDescriptionBuilder(avatar: self).description
     }
@@ -33,7 +35,8 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
         location: Location? = nil,
         profileImageUrl: String? = nil,
         authodId: String? = nil,
-        dateCreated: Date = Date()
+        dateCreated: Date = Date(),
+        viewCount: Int? = nil
     ) {
         self.id = avatarId
         self.name = name
@@ -43,6 +46,7 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
         self.profileImageUrl = profileImageUrl
         self.authodId = authodId
         self.dateCreated = dateCreated
+        self.viewCount = viewCount
     }
     
     mutating func updateProfileImage(image: String) {
@@ -58,6 +62,7 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
         case profileImageUrl = "profile_image_url"
         case authodId = "author_id"
         case dateCreated = "date_created"
+        case viewCount = "view_count"
     }
     
     static var mock: Avatar {
@@ -74,7 +79,8 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
                 location: .beach,
                 profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
-                dateCreated: .now
+                dateCreated: .now,
+                viewCount: 45
             ),
             Avatar(
                 avatarId: UUID().uuidString,
@@ -84,7 +90,8 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
                 location: .space,
                 profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
-                dateCreated: .now
+                dateCreated: .now,
+                viewCount: 23
             ),
             Avatar(
                 avatarId: UUID().uuidString,
@@ -94,7 +101,8 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
                 location: .desert,
                 profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
-                dateCreated: .now
+                dateCreated: .now,
+                viewCount: 78
             ),
             Avatar(
                 avatarId: UUID().uuidString,
@@ -104,7 +112,8 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
                 location: .forest,
                 profileImageUrl: Constants.randomImageUrl,
                 authodId: UUID().uuidString,
-                dateCreated: .now
+                dateCreated: .now,
+                viewCount: 6
             )
         ]
     }
