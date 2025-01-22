@@ -50,7 +50,6 @@ private extension CreateAccountView {
         Task {
             do {
                 let result = try await authManager.signInWithApple()
-                print("DEBUG: Did sign in with Apple \(result.user.uid)")
                 
                 try await userManager.login(userAuth: result.user, isNewUser: result.isNewUser)
                 

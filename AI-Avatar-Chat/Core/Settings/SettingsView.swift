@@ -15,7 +15,7 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
     
     @State private var isPremium: Bool = false
-    @State private var isAnonymousUser: Bool = false
+    @State private var isAnonymousUser: Bool = true
     @State private var showCreateAccountView: Bool = false
     
     @State private var showAlert: AppAlert?
@@ -161,7 +161,7 @@ private extension SettingsView {
 // MARK: Logic Section
 private extension SettingsView {
     func setAnonymousStatus() {
-        isAnonymousUser = authManager.authUser?.isAnonymous == true
+        isAnonymousUser = userManager.currentUser?.isAnonymous ?? true
     }
     
     func onSignOutTapped() {

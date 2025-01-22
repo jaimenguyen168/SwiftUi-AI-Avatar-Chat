@@ -54,6 +54,7 @@ struct FirebaseAuthService: AuthService {
         if let user = Auth.auth().currentUser, user.isAnonymous {
             do {
                 let result = try await user.link(with: credential)
+                
                 return result.asAuthUserInfo
             } catch let error as NSError {
                 let authError = AuthErrorCode(rawValue: error.code)

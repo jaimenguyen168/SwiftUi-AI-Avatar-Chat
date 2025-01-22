@@ -65,6 +65,18 @@ struct Dependency {
     }
 }
 
+extension View {
+    func previewAllEnvironments(isSignIn: Bool = true) -> some View {
+        self
+            .environment(AIManager(aiService: MockAIService()))
+            .environment(AvatarManager(avatarService: MockAvatarService()))
+            .environment(UserManager(userServices: MockUserServices(user: isSignIn ? .mock : nil)))
+            .environment(AuthManager(authService: MockAuthService(authUser: isSignIn ? .mock() : nil)))
+            .environment(AppState())
+    }
+}
+
+
 // swiftlint:disable all
 //struct EnvironmentBuilder<Content: View>: View {
 //

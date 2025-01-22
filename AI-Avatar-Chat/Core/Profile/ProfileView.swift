@@ -52,7 +52,7 @@ struct ProfileView: View {
     }
 }
 
-// View section
+// MARK: Views Section
 private extension ProfileView {
     var currentUserInfoSection: some View {
         Section {
@@ -123,7 +123,7 @@ private extension ProfileView {
     }
 }
 
-// Logic section
+// MARK: Logic Section
 private extension ProfileView {
     func loadData() async {
         self.currentUser = userManager.currentUser
@@ -159,9 +159,6 @@ private extension ProfileView {
 #Preview {
     NavigationStack {
         ProfileView()
-            .navigationTitle(TabBarItem.profile.rawValue.capitalized)
-            .environment(AppState())
-            .environment(UserManager(userServices: MockUserServices(user: .mock)))
-            .environment(AvatarManager(avatarService: MockAvatarService()))
+            .previewAllEnvironments()
     }
 }
