@@ -12,6 +12,8 @@ struct ChatView: View {
     var avatar: Avatar = .mock
     
     @Environment(AvatarManager.self) private var avatarManager
+    @Environment(AIManager.self) private var aiManager
+    
     @State private var currentAvatar: Avatar?
     
     @State private var chatMessages: [ChatMessage] = ChatMessage.mockConversation
@@ -147,25 +149,51 @@ private extension ChatView {
     func onSendMessagePress() {
         guard let currentUser else { return }
         
-        do {
-            try TextValidationHelper.validateText(text: textMessage)
-            
-            let message = ChatMessage(
-                id: UUID().uuidString,
-                chatId: UUID().uuidString,
-                authorId: currentUser.userId,
-                content: textMessage,
-                seenByIds: nil,
-                dateCreated: .now
-            )
-            
-            chatMessages.append(message)
-            
-            scrollPosition = message.id
-            
-            textMessage = ""
-        } catch {
-            showAlert = AppAlert(error: error)
+        let content = textMessage
+        
+        Task {
+            do {
+                try TextValidationHelper.validateText(text: content)
+                
+                let newMessage = AIChatModel(
+                    role: .user,
+                    content: content
+                )
+                
+                let message = ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: UUID().uuidString,
+                    authorId: currentUser.userId,
+                    content: newMessage,
+                    seenByIds: nil,
+                    dateCreated: .now
+                )
+                
+                chatMessages.append(message)
+                
+                scrollPosition = message.id
+                
+                textMessage = ""
+                
+                let aiChats = chatMessages.compactMap({
+                    $0.content
+                })
+                
+                let response = try await aiManager.generateText(chats: aiChats)
+                
+                let aiMessage = ChatMessage(
+                    id: UUID().uuidString,
+                    chatId: UUID().uuidString,
+                    authorId: avatar.id,
+                    content: response,
+                    seenByIds: nil,
+                    dateCreated: .now
+                )
+                
+                chatMessages.append(aiMessage)
+            } catch {
+                showAlert = AppAlert(error: error)
+            }
         }
     }
     
@@ -193,5 +221,6 @@ private extension ChatView {
     NavigationStack {
         ChatView()
             .environment(AvatarManager(avatarService: MockAvatarService()))
+            .environment(AIManager(aiService: OpenAIService()))
     }
 }

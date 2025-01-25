@@ -16,7 +16,7 @@ struct ChatBubbleViewBuilder: View {
     
     var body: some View {
         ChatBubbleView(
-            text: message.content ?? "",
+            text: message.content?.message ?? "",
             textColor: isCurrentUser ? .white : .primary,
             backgroundColor: isCurrentUser ? .accent : Color(uiColor: .systemGray5),
             showImage: !isCurrentUser,
@@ -41,7 +41,10 @@ struct ChatBubbleViewBuilder: View {
                     id: "123",
                     chatId: "123",
                     authorId: "123",
-                    content: "This is a very long message that goes multiple lines",
+                    content: AIChatModel(
+                        role: .user,
+                        content: "This is a very long message that goes multiple lines"
+                    ),
                     seenByIds: nil,
                     dateCreated: Date.now
                 )
@@ -51,7 +54,10 @@ struct ChatBubbleViewBuilder: View {
                     id: "123",
                     chatId: "123",
                     authorId: "123",
-                    content: "This is a very long message that goes multiple lines",
+                    content: AIChatModel(
+                        role: .user,
+                        content: "This is a very long message that goes multiple lines"
+                    ),
                     seenByIds: nil,
                     dateCreated: Date.now
                 ),
