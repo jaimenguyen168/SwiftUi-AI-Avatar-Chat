@@ -60,6 +60,14 @@ struct MockAvatarService: RemoteAvatarService {
         
     }
     
+    func removeAuthorIdFromAvatar(_ avatarId: String) async throws {
+        
+    }
+    
+    func removeAuthorIdFromAllAvatars(authorId: String) async throws {
+        
+    }
+    
     private func showCustomError() throws {
         if showError {
             throw URLError(.unknown)

@@ -32,4 +32,13 @@ struct SwiftDataLocalAvatarPersistence: LocalAvatarPersistence {
         let entities = try mainContext.fetch(descriptor)
         return entities.map({ $0.toModel() })
     }
+    
+    func removeAllRecentAvatars() throws {
+        let descriptor = FetchDescriptor<AvatarEntity>()
+        let entities = try mainContext.fetch(descriptor)
+        for entity in entities {
+            mainContext.delete(entity)
+        }
+        try mainContext.save()
+    }
 }

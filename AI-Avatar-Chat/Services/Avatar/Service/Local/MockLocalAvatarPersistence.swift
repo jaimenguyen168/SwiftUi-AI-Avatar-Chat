@@ -9,6 +9,10 @@ import SwiftUI
 
 @MainActor
 struct MockLocalAvatarPersistence: LocalAvatarPersistence {
+    func removeAllRecentAvatars() throws {
+        
+    }
+    
     func addRecentAvatar(_ avatar: Avatar) throws {
         
     }

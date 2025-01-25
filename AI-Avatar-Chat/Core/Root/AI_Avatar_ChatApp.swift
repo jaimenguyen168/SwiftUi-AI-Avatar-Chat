@@ -76,7 +76,6 @@ extension View {
     }
 }
 
-
 // swiftlint:disable all
 //struct EnvironmentBuilder<Content: View>: View {
 //

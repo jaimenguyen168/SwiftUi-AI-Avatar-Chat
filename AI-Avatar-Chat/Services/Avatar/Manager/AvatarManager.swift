@@ -27,6 +27,10 @@ class AvatarManager {
         try local.getRecentAvatars()
     }
     
+    func removeAllRecentAvatars() async throws {
+        try local.removeAllRecentAvatars()
+    }
+    
     func createAvatar(avatar: Avatar, image: UIImage) async throws {
         try await remote.createAvatar(avatar, image: image)
     }
@@ -49,5 +53,13 @@ class AvatarManager {
     
     func getAvatarById(_ id: String) async throws -> Avatar? {
         try await remote.getAvatar(id: id)
+    }
+    
+    func removeAuthorIdFromAvatar(_ avatarId: String) async throws {
+        try await remote.removeAuthorIdFromAvatar(avatarId)
+    }
+    
+    func removeAuthorIdFromAllAvatars(authorId: String) async throws {
+        try await remote.removeAuthorIdFromAllAvatars(authorId: authorId)
     }
 }

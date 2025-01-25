@@ -54,6 +54,28 @@ struct FirebaseAvatarService: RemoteAvatarService {
 //            .sorted(by: {$0.dateCreated > $1.dateCreated})
     }
     
+    func removeAuthorIdFromAvatar(_ avatarId: String) async throws {
+        try await collection
+            .document(avatarId)
+            .updateData([
+                Avatar.CodingKeys.authodId.rawValue: NSNull()
+            ])
+    }
+    
+    func removeAuthorIdFromAllAvatars(authorId: String) async throws {
+        let avatars = try await getAvatarsForAuthor(authorId: authorId)
+        
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for avatar in avatars {
+                group.addTask {
+                    try await removeAuthorIdFromAvatar(avatar.id)
+                }
+            }
+            
+            try await group.waitForAll()
+        }
+    }
+    
     func getAvatar(id: String) async throws -> Avatar {
         try await collection
             .getDocument(id: id)

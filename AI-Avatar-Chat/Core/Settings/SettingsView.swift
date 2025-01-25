@@ -12,6 +12,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AuthManager.self) private var authManager
     @Environment(UserManager.self) private var userManager
+    @Environment(AvatarManager.self) private var avatarManager
     @Environment(AppState.self) private var appState
     
     @State private var isPremium: Bool = false
@@ -203,8 +204,14 @@ private extension SettingsView {
     func onDeleteAccountConfirmed() {
         Task {
             do {
-                try await authManager.deleteAccount()
-                try await userManager.deleteCurrentUser()
+                let uid = try authManager.getAuthId()
+                
+                async let deleteAuth: () = authManager.deleteAccount()
+                async let deleteUser: () = userManager.deleteCurrentUser()
+                async let removeUser: () = avatarManager.removeAuthorIdFromAllAvatars(authorId: uid)
+                async let removeRecentAvatars: () = avatarManager.removeAllRecentAvatars()
+                
+                let (_, _, _, _) = await (try deleteAuth, try deleteUser, try removeUser, try removeRecentAvatars)
                 
                 await dismissView()
             } catch {
@@ -235,6 +242,7 @@ fileprivate extension View {
 //        .environment(\.authService, MockAuthService(user: nil))
         .environment(AuthManager(authService: MockAuthService(authUser: nil)))
         .environment(UserManager(userServices: MockUserServices(user: nil)))
+        .environment(AvatarManager(avatarService: MockAvatarService()))
         .environment(AppState())
 }
 
@@ -242,6 +250,7 @@ fileprivate extension View {
     SettingsView()
         .environment(AuthManager(authService: MockAuthService(authUser: UserAuthInfo.mock(isAnonymous: true))))
         .environment(UserManager(userServices: MockUserServices(user: .mock)))
+        .environment(AvatarManager(avatarService: MockAvatarService()))
         .environment(AppState())
 }
 
@@ -249,5 +258,6 @@ fileprivate extension View {
     SettingsView()
         .environment(AuthManager(authService: MockAuthService(authUser: UserAuthInfo.mock(isAnonymous: false))))
         .environment(UserManager(userServices: MockUserServices(user: .mock)))
+        .environment(AvatarManager(avatarService: MockAvatarService()))
         .environment(AppState())
 }

@@ -17,6 +17,7 @@ struct ProfileView: View {
     @State private var currentUser: AppUser?
     @State private var myAvatars: [Avatar] = []
     @State private var isLoading: Bool = true
+    @State private var showAlert: AppAlert?
     
     @State private var option: NavigationCoreOption?
     
@@ -49,6 +50,7 @@ struct ProfileView: View {
         .task {
             await loadData()
         }
+        .showCustomAlert(alert: $showAlert)
     }
 }
 
@@ -148,7 +150,19 @@ private extension ProfileView {
     
     func onDeleteAvatar(indexSet: IndexSet) {
         guard let index = indexSet.first else { return }
-        myAvatars.remove(at: index)
+        let avatarToDelete = myAvatars[index]
+        
+        Task {
+            do {
+                try await avatarManager.removeAuthorIdFromAvatar(avatarToDelete.avatarId)
+                myAvatars.remove(at: index)
+            } catch {
+                showAlert = AppAlert(
+                    title: "Unable to delete",
+                    subtitle: "Please try again later"
+                )
+            }
+        }
     }
     
     func onAvatarPress(_ avatar: Avatar) {

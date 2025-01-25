@@ -11,4 +11,5 @@ import SwiftUI
 protocol LocalAvatarPersistence {
     func addRecentAvatar(_ avatar: Avatar) throws
     func getRecentAvatars() throws -> [Avatar]
+    func removeAllRecentAvatars() throws
 }
