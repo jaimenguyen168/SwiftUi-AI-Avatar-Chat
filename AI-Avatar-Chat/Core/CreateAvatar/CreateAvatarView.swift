@@ -183,16 +183,12 @@ struct CreateAvatarView: View {
                 try TextValidationHelper.validateText(text: avatarName, minimumLength: 4)
                 let uid = try authManager.getAuthId()
                 
-                let avatar = Avatar(
-                    avatarId: UUID().uuidString,
+                let avatar = Avatar.newAvatar(
                     name: avatarName,
                     character: character,
                     action: action,
                     location: location,
-                    profileImageUrl: nil,
-                    authodId: uid,
-                    dateCreated: .now,
-                    viewCount: 0
+                    authorId: uid
                 )
                 
                 try await avatarManager.createAvatar(
@@ -212,7 +208,5 @@ struct CreateAvatarView: View {
 
 #Preview {
     CreateAvatarView()
-        .environment(AIManager(aiService: MockAIService()))
-        .environment(AuthManager(authService: MockAuthService()))
-        .environment(AvatarManager(avatarService: MockAvatarService()))
+        .previewAllEnvironments()
 }

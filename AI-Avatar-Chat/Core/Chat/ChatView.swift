@@ -10,9 +10,10 @@ import SwiftUI
 struct ChatView: View {
     
     var avatar: Avatar = .mock
-    
+
     @Environment(AvatarManager.self) private var avatarManager
     @Environment(AIManager.self) private var aiManager
+    @Environment(AuthManager.self) private var authManager
     
     @State private var currentAvatar: Avatar?
     
@@ -147,12 +148,15 @@ private extension ChatView {
     }
     
     func onSendMessagePress() {
-        guard let currentUser else { return }
-        
+        guard let avatarId = currentAvatar?.avatarId else {
+            return }
+    
         let content = textMessage
         
         Task {
             do {
+                let uid = try authManager.getAuthId()
+                
                 try TextValidationHelper.validateText(text: content)
                 
                 let newMessage = AIChatModel(
@@ -160,18 +164,15 @@ private extension ChatView {
                     content: content
                 )
                 
-                let message = ChatMessage(
-                    id: UUID().uuidString,
+                let message = ChatMessage.newUserMessage(
                     chatId: UUID().uuidString,
-                    authorId: currentUser.userId,
-                    content: newMessage,
-                    seenByIds: nil,
-                    dateCreated: .now
+                    userId: uid,
+                    message: newMessage
                 )
                 
                 chatMessages.append(message)
                 
-                scrollPosition = message.id
+                scrollToBottom()
                 
                 textMessage = ""
                 
@@ -181,16 +182,15 @@ private extension ChatView {
                 
                 let response = try await aiManager.generateText(chats: aiChats)
                 
-                let aiMessage = ChatMessage(
-                    id: UUID().uuidString,
+                let aiMessage = ChatMessage.newAIMessage(
                     chatId: UUID().uuidString,
-                    authorId: avatar.id,
-                    content: response,
-                    seenByIds: nil,
-                    dateCreated: .now
+                    avatarId: avatarId,
+                    message: response
                 )
                 
                 chatMessages.append(aiMessage)
+                
+                scrollToBottom()
             } catch {
                 showAlert = AppAlert(error: error)
             }
@@ -215,12 +215,15 @@ private extension ChatView {
     func onAvatarImagePress() {
         showProfileModal = true
     }
+    
+    func scrollToBottom() {
+        scrollPosition = chatMessages.last!.id
+    }
 }
 
 #Preview {
     NavigationStack {
         ChatView()
-            .environment(AvatarManager(avatarService: MockAvatarService()))
-            .environment(AIManager(aiService: OpenAIService()))
+            .previewAllEnvironments()
     }
 }

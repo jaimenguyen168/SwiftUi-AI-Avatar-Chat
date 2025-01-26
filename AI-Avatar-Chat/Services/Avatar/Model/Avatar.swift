@@ -65,6 +65,26 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
         case viewCount = "view_count"
     }
     
+    static func newAvatar(
+        name: String,
+        character: Character,
+        action: Action,
+        location: Location,
+        authorId: String
+    ) -> Self {
+        Avatar(
+            avatarId: UUID().uuidString,
+            name: name,
+            character: character,
+            action: action,
+            location: location,
+            profileImageUrl: nil,
+            authodId: authorId,
+            dateCreated: .now,
+            viewCount: 0
+        )
+    }
+    
     static var mock: Avatar {
         mocks[0]
     }
