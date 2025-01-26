@@ -8,12 +8,30 @@
 import Foundation
 import SwiftUI
 
-struct Chat: Identifiable, Hashable {
+struct Chat: Identifiable, Hashable, Encodable {
     let id: String
     let userId: String
     let avatarId: String
     let dateCreated: Date
     let dateModified: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case avatarId = "avatar_id"
+        case dateCreated = "date_created"
+        case dateModified = "date_modified"
+    }
+    
+    static func newChat(userId: String, avatarId: String) -> Self {
+        .init(
+            id: "\(userId)_\(avatarId)",
+            userId: userId,
+            avatarId: avatarId,
+            dateCreated: .now,
+            dateModified: .now
+        )
+    }
     
     static var mock: Chat {
         mocks[0]

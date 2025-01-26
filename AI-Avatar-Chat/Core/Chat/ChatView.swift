@@ -11,14 +11,17 @@ struct ChatView: View {
     
     var avatar: Avatar = .mock
 
+    @Environment(UserManager.self) private var userManager
     @Environment(AvatarManager.self) private var avatarManager
     @Environment(AIManager.self) private var aiManager
     @Environment(AuthManager.self) private var authManager
+    @Environment(ChatManager.self) private var chatManager
     
     @State private var currentAvatar: Avatar?
     
     @State private var chatMessages: [ChatMessage] = ChatMessage.mockConversation
-    @State private var currentUser: AppUser? = .mock
+    @State private var currentUser: AppUser?
+    @State private var chat: Chat?
     
     @State private var showProfileModal = false
     
@@ -56,6 +59,9 @@ struct ChatView: View {
         .task {
             await loadAvatar()
         }
+        .onAppear {
+            loadCurrentUser()
+        }
     }
 }
 
@@ -64,11 +70,12 @@ private extension ChatView {
         ScrollView {
             LazyVStack(spacing: 24) {
                 ForEach(chatMessages) { message in
-                    let isCurrentUser = message.authorId == currentUser?.userId
+                    let isCurrentUser = message.authorId == authManager.authUser?.uid
                     
                     ChatBubbleViewBuilder(
                         message: message,
                         isCurrentUser: isCurrentUser,
+                        userColor: currentUser?.profileColorSwift ?? .accent,
                         imageName: isCurrentUser ? nil : avatar.profileImageUrl,
                         onImagePress: {
                             onAvatarImagePress()
@@ -136,6 +143,10 @@ private extension ChatView {
 }
 
 private extension ChatView {
+    func loadCurrentUser() {
+        currentUser = userManager.currentUser
+    }
+    
     // may not needed
     func loadAvatar() async {
         do {
@@ -158,6 +169,17 @@ private extension ChatView {
                 let uid = try authManager.getAuthId()
                 
                 try TextValidationHelper.validateText(text: content)
+                
+                if chat == nil {
+                    let newChat = Chat.newChat(
+                        userId: uid,
+                        avatarId: avatarId
+                    )
+                    
+                    try await chatManager.createNewChat(chat: newChat)
+                    
+                    chat = newChat
+                }
                 
                 let newMessage = AIChatModel(
                     role: .user,

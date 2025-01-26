@@ -11,6 +11,7 @@ struct ChatBubbleViewBuilder: View {
     
     var message: ChatMessage = .mock
     var isCurrentUser: Bool = false
+    var userColor: Color = .accentColor
     var imageName: String?
     var onImagePress: (() -> Void)?
     
@@ -18,7 +19,7 @@ struct ChatBubbleViewBuilder: View {
         ChatBubbleView(
             text: message.content?.message ?? "",
             textColor: isCurrentUser ? .white : .primary,
-            backgroundColor: isCurrentUser ? .accent : Color(uiColor: .systemGray5),
+            backgroundColor: isCurrentUser ? userColor : Color(uiColor: .systemGray5),
             showImage: !isCurrentUser,
             imageName: imageName,
             onImagePress: onImagePress
@@ -61,7 +62,8 @@ struct ChatBubbleViewBuilder: View {
                     seenByIds: nil,
                     dateCreated: Date.now
                 ),
-                isCurrentUser: true
+                isCurrentUser: true,
+                userColor: .cyan
             )
         }
         .padding(12)

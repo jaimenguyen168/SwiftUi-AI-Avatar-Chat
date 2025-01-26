@@ -16,6 +16,7 @@ struct AIAvatarChatApp: App {
     var body: some Scene {
         WindowGroup {
             AppView()
+                .environment(delegate.dependencies.chatManager)
                 .environment(delegate.dependencies.aiManager)
                 .environment(delegate.dependencies.avatarManager)
                 .environment(delegate.dependencies.userManager)
@@ -47,6 +48,7 @@ struct Dependency {
     let userManager: UserManager
     let aiManager: AIManager
     let avatarManager: AvatarManager
+    let chatManager: ChatManager
     
     init() {
         self.authManager = AuthManager(
@@ -62,12 +64,16 @@ struct Dependency {
             avatarService: FirebaseAvatarService(),
             localService: SwiftDataLocalAvatarPersistence()
         )
+        self.chatManager = ChatManager(
+            service: FirebaseChatService()
+        )
     }
 }
 
 extension View {
     func previewAllEnvironments(isSignIn: Bool = true) -> some View {
         self
+            .environment(ChatManager(service: MockChatService()))
             .environment(AIManager(aiService: MockAIService()))
             .environment(AvatarManager(avatarService: MockAvatarService()))
             .environment(UserManager(userServices: MockUserServices(user: isSignIn ? .mock : nil)))
