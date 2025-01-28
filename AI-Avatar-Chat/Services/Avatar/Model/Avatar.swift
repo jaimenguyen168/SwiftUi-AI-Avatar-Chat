@@ -92,7 +92,7 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
     static var mocks: [Avatar] {
         [
             Avatar(
-                avatarId: UUID().uuidString,
+                avatarId: "mock_ava_1",
                 name: "Alpha",
                 character: .alien,
                 action: .eating,
@@ -103,7 +103,7 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
                 viewCount: 45
             ),
             Avatar(
-                avatarId: UUID().uuidString,
+                avatarId: "mock_ava_2",
                 name: "Beta",
                 character: .dog,
                 action: .smiling,
@@ -114,7 +114,7 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
                 viewCount: 23
             ),
             Avatar(
-                avatarId: UUID().uuidString,
+                avatarId: "mock_ava_3",
                 name: "Gamma",
                 character: .cat,
                 action: .working,
@@ -125,7 +125,7 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
                 viewCount: 78
             ),
             Avatar(
-                avatarId: UUID().uuidString,
+                avatarId: "mock_ava_4",
                 name: "Delta",
                 character: .woman,
                 action: .dancing,

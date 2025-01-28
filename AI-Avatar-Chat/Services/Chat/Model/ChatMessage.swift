@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ChatMessage: Identifiable {
+struct ChatMessage: Identifiable, Codable {
     let id: String
     let chatId: String
     let authorId: String?
@@ -34,6 +34,15 @@ struct ChatMessage: Identifiable {
     func hasBeenSeenByCurrentUser(userId: String) -> Bool {
         guard let seenByIds else { return false }
         return seenByIds.contains(userId)
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case chatId = "chat_id"
+        case authorId = "author_id"
+        case content
+        case seenByIds = "seen_by_ids"
+        case dateCreated = "date_created"
     }
     
     static func newUserMessage(
@@ -89,116 +98,117 @@ struct ChatMessage: Identifiable {
     
     static var mockConversation: [ChatMessage] {
         let now = Date()
-        let chatId = UUID().uuidString
+        let userId = UserAuthInfo.mock().uid
+        let avatarId = Avatar.mock.avatarId
         return [
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser1",
+                chatId: "1",
+                authorId: userId,
                 content: AIChatModel(
                     role: .user,
                     content: "Hey, how's it going?"
                 ),
-                seenByIds: ["user_2"],
+                seenByIds: [avatarId],
                 dateCreated: now.addTimeInterval(minutes: -50)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser2",
+                chatId: "1",
+                authorId: avatarId,
                 content: AIChatModel(
                     role: .assistant,
                     content: "Pretty good, how about you?"
                 ),
-                seenByIds: ["user_1"],
+                seenByIds: [userId],
                 dateCreated: now.addTimeInterval(minutes: -48)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser1",
+                chatId: "1",
+                authorId: userId,
                 content: AIChatModel(
                     role: .user,
                     content: "Not bad, just been busy with work lately."
                 ),
-                seenByIds: ["user_2"],
+                seenByIds: [avatarId],
                 dateCreated: now.addTimeInterval(minutes: -46)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser2",
+                chatId: "1",
+                authorId: avatarId,
                 content: AIChatModel(
                     role: .assistant,
                     content: "I hear you! Same here. What’s keeping you busy?"
                 ),
-                seenByIds: ["user_1"],
+                seenByIds: [userId],
                 dateCreated: now.addTimeInterval(minutes: -44)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser1",
+                chatId: "1",
+                authorId: userId,
                 content: AIChatModel(
                     role: .user,
                     content: "Mainly wrapping up a new project. It’s been intense."
                 ),
-                seenByIds: ["user_2"],
+                seenByIds: [avatarId],
                 dateCreated: now.addTimeInterval(minutes: -42)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser2",
+                chatId: "1",
+                authorId: avatarId,
                 content: AIChatModel(
                     role: .assistant,
                     content: "That sounds exciting! What's the project about?"
                 ),
-                seenByIds: ["user_1"],
+                seenByIds: [userId],
                 dateCreated: now.addTimeInterval(minutes: -40)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser1",
+                chatId: "1",
+                authorId: userId,
                 content: AIChatModel(
                     role: .user,
                     content: "It’s a new app for managing personal finances. Still a lot to do!"
                 ),
-                seenByIds: ["user_2"],
+                seenByIds: [avatarId],
                 dateCreated: now.addTimeInterval(minutes: -38)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser2",
+                chatId: "1",
+                authorId: avatarId,
                 content: AIChatModel(
                     role: .assistant,
                     content: "That sounds useful. Let me know when it's done!"
                 ),
-                seenByIds: ["user_1"],
+                seenByIds: [userId],
                 dateCreated: now.addTimeInterval(minutes: -36)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser1",
+                chatId: "1",
+                authorId: userId,
                 content: AIChatModel(
                     role: .user,
                     content: "Will do! How’s everything on your end?"
                 ),
-                seenByIds: ["user_2"],
+                seenByIds: [avatarId],
                 dateCreated: now.addTimeInterval(minutes: -34)
             ),
             ChatMessage(
                 id: UUID().uuidString,
-                chatId: chatId,
-                authorId: "mockUser2",
+                chatId: "1",
+                authorId: avatarId,
                 content: AIChatModel(
                     role: .assistant,
                     content: "Busy, but good. Let’s catch up more soon!"
                 ),
-                seenByIds: ["user_1"],
+                seenByIds: [userId],
                 dateCreated: now.addTimeInterval(minutes: -32)
             )
         ]

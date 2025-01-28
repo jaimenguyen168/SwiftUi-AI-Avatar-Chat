@@ -24,12 +24,14 @@ struct ChatView: View {
     @State private var chat: Chat?
     
     @State private var showProfileModal = false
+    @State private var isGeneratingResponse = false
     
     @State private var textMessage = ""
     @State private var scrollPosition: String?
     
     @State private var showChatSettings: AppAlert?
     @State private var showAlert: AppAlert?
+    
     
     var body: some View {
         VStack(spacing: 0) {
@@ -85,6 +87,7 @@ private extension ChatView {
             }
             .frame(maxWidth: .infinity)
             .padding(8)
+            .padding(.bottom, 4)
         }
         .defaultScrollAnchor(.bottom)
         .scrollPosition(id: $scrollPosition, anchor: .bottom)
@@ -98,21 +101,30 @@ private extension ChatView {
     }
     
     var sendMessageSection: some View {
-        TextField("Type your message...", text: $textMessage)
+        let color: Color = userManager.currentUser?.profileColorSwift ?? .accentColor
+        
+        return TextField("Type your message...", text: $textMessage)
             .keyboardType(.alphabet)
             .autocorrectionDisabled()
             .padding(12)
             .padding(.trailing, 48)
-            .overlay(
-                Image(systemName: "paperplane.circle.fill")
-                    .font(.system(size: 32))
-                    .padding(.trailing, 6)
-                    .foregroundStyle(.accent)
-                    .customButton {
-                        onSendMessagePress()
+            .overlay(alignment: .trailing) {
+                ZStack {
+                    if isGeneratingResponse {
+                        ProgressView()
+                            .tint(color)
+                            .padding(.trailing, 12)
+                    } else {
+                        Image(systemName: "paperplane.circle.fill")
+                            .font(.system(size: 32))
+                            .padding(.trailing, 6)
+                            .foregroundStyle(color)
+                            .customButton {
+                                onSendMessagePress()
+                            }
                     }
-                , alignment: .trailing
-            )
+                }
+            }
             .background(
                 ZStack(alignment: .trailing) {
                     Capsule()
@@ -159,27 +171,27 @@ private extension ChatView {
     }
     
     func onSendMessagePress() {
-        guard let avatarId = currentAvatar?.avatarId else {
-            return }
-    
         let content = textMessage
         
         Task {
             do {
                 let uid = try authManager.getAuthId()
+                let avatarId = currentAvatar?.avatarId ?? ""
                 
                 try TextValidationHelper.validateText(text: content)
                 
                 if chat == nil {
-                    let newChat = Chat.newChat(
-                        userId: uid,
+                    chat = try await createNewChat(
+                        uid: uid,
                         avatarId: avatarId
                     )
-                    
-                    try await chatManager.createNewChat(chat: newChat)
-                    
-                    chat = newChat
                 }
+                
+                guard let chat else {
+                    throw ChatViewError.noChat
+                }
+                
+                isGeneratingResponse = true
                 
                 let newMessage = AIChatModel(
                     role: .user,
@@ -187,11 +199,15 @@ private extension ChatView {
                 )
                 
                 let message = ChatMessage.newUserMessage(
-                    chatId: UUID().uuidString,
+                    chatId: chat.id,
                     userId: uid,
                     message: newMessage
                 )
                 
+                try await chatManager.addChatMessage(
+                    chatId: chat.id,
+                    message: message
+                )
                 chatMessages.append(message)
                 
                 scrollToBottom()
@@ -205,18 +221,35 @@ private extension ChatView {
                 let response = try await aiManager.generateText(chats: aiChats)
                 
                 let aiMessage = ChatMessage.newAIMessage(
-                    chatId: UUID().uuidString,
+                    chatId: chat.id,
                     avatarId: avatarId,
                     message: response
                 )
                 
+                try await chatManager.addChatMessage(
+                    chatId: chat.id,
+                    message: aiMessage
+                )
                 chatMessages.append(aiMessage)
                 
                 scrollToBottom()
             } catch {
                 showAlert = AppAlert(error: error)
             }
+            
+            isGeneratingResponse = false
         }
+    }
+    
+    func createNewChat(uid: String, avatarId: String) async throws -> Chat {
+        let newChat = Chat.newChat(
+            userId: uid,
+            avatarId: avatarId
+        )
+        
+        try await chatManager.createNewChat(chat: newChat)
+        
+        return newChat
     }
     
     func onChatSettingPress() {
@@ -243,9 +276,32 @@ private extension ChatView {
     }
 }
 
-#Preview {
+// MARK: - Enum
+private extension ChatView {
+    enum ChatViewError: Error {
+        case noChat
+    }
+}
+
+#Preview("Working Chat") {
     NavigationStack {
         ChatView()
+            .previewAllEnvironments()
+    }
+}
+
+#Preview("Slow AI Response") {
+    NavigationStack {
+        ChatView()
+            .environment(AIManager(aiService: MockAIService(delay: 10)))
+            .previewAllEnvironments()
+    }
+}
+
+#Preview("Failed Response") {
+    NavigationStack {
+        ChatView()
+            .environment(AIManager(aiService: MockAIService(delay: 2, showError: true)))
             .previewAllEnvironments()
     }
 }
