@@ -19,7 +19,7 @@ struct ChatView: View {
     
     @State private var currentAvatar: Avatar?
     
-    @State private var chatMessages: [ChatMessage] = ChatMessage.mockConversation
+    @State private var chatMessages: [ChatMessage] = []
     @State private var currentUser: AppUser?
     @State private var chat: Chat?
     
@@ -31,7 +31,6 @@ struct ChatView: View {
     
     @State private var showChatSettings: AppAlert?
     @State private var showAlert: AppAlert?
-    
     
     var body: some View {
         VStack(spacing: 0) {
@@ -61,6 +60,10 @@ struct ChatView: View {
         .task {
             await loadAvatar()
         }
+        .task {
+            await loadChat()
+            await listenForChatMessages()
+        }
         .onAppear {
             loadCurrentUser()
         }
@@ -83,20 +86,19 @@ private extension ChatView {
                             onAvatarImagePress()
                         }
                     )
+                    .padding(.bottom, chatMessages.last?.id == message.id ? 16 : 0)
                 }
             }
             .frame(maxWidth: .infinity)
             .padding(8)
-            .padding(.bottom, 4)
         }
+        .scrollTargetLayout()
         .defaultScrollAnchor(.bottom)
         .scrollPosition(id: $scrollPosition, anchor: .bottom)
-        .animation(.default, value: chatMessages.count)
         .animation(.default, value: scrollPosition)
-        .onAppear {
-            withAnimation(.default) {
-                scrollPosition = chatMessages.last?.id
-            }
+        .animation(.default, value: chatMessages.count)
+        .onChange(of: chatMessages.count) { _, _ in
+            scrollToBottom()
         }
     }
     
@@ -159,7 +161,7 @@ private extension ChatView {
         currentUser = userManager.currentUser
     }
     
-    // may not needed
+    // may not needed since we pass in avatar
     func loadAvatar() async {
         do {
             currentAvatar = try await avatarManager.getAvatarById(avatar.avatarId)
@@ -168,6 +170,38 @@ private extension ChatView {
         } catch {
             print("DEBUG: failed to load avatar for chat with error \(error.localizedDescription)")
         }
+    }
+    
+    func loadChat() async {
+        do {
+            let uid = try authManager.getAuthId()
+            chat = try await chatManager.fetchChat(
+                userId: uid,
+                avatarId: avatar.avatarId
+            )
+            
+            print("Chat loaded successfully")
+        } catch {
+            print("DEBUG: Failed to load chat with error \(error.localizedDescription)")
+        }
+    }
+    
+    func listenForChatMessages() async {
+        do {
+            guard let chat else { throw ChatViewError.noChat }
+            let chatId = chat.id
+            
+            for try await value in chatManager.streamChatMessages(chatId: chatId) {
+                
+                chatMessages = value.sorted(by: {
+                    $0.dateCreatedCalculated < $1.dateCreatedCalculated
+                })
+            }
+        } catch {
+            print("DEBUG: Failed to listen for chat messages with error \(error.localizedDescription)")
+        }
+        
+        scrollToBottom()
     }
     
     func onSendMessagePress() {
@@ -208,15 +242,18 @@ private extension ChatView {
                     chatId: chat.id,
                     message: message
                 )
-                chatMessages.append(message)
-                
-                scrollToBottom()
-                
+
                 textMessage = ""
                 
-                let aiChats = chatMessages.compactMap({
+                var aiChats = chatMessages.compactMap({
                     $0.content
                 })
+                
+                let systemMessage = AIChatModel(
+                    role: .system,
+                    content: Avatar.aiDescription(avatar)
+                )
+                aiChats.insert(systemMessage, at: 0)
                 
                 let response = try await aiManager.generateText(chats: aiChats)
                 
@@ -230,9 +267,6 @@ private extension ChatView {
                     chatId: chat.id,
                     message: aiMessage
                 )
-                chatMessages.append(aiMessage)
-                
-                scrollToBottom()
             } catch {
                 showAlert = AppAlert(error: error)
             }
@@ -248,6 +282,13 @@ private extension ChatView {
         )
         
         try await chatManager.createNewChat(chat: newChat)
+        
+        // force to attach listener when no chat yet
+        defer {
+            Task {
+                await listenForChatMessages()
+            }
+        }
         
         return newChat
     }
@@ -272,7 +313,9 @@ private extension ChatView {
     }
     
     func scrollToBottom() {
-        scrollPosition = chatMessages.last!.id
+        withAnimation(.default) {
+            scrollPosition = chatMessages.last?.id
+        }
     }
 }
 

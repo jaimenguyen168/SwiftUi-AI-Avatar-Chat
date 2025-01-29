@@ -31,6 +31,10 @@ struct ChatMessage: Identifiable, Codable {
         self.dateCreated = dateCreated
     }
     
+    var dateCreatedCalculated: Date {
+        dateCreated ?? .distantPast
+    }
+    
     func hasBeenSeenByCurrentUser(userId: String) -> Bool {
         guard let seenByIds else { return false }
         return seenByIds.contains(userId)

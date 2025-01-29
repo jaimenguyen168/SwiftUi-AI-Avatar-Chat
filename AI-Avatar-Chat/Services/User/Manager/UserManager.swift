@@ -14,7 +14,6 @@ class UserManager {
     private let remote: RemoteUserService
     private let local: LocalUserPersistenceService
     private(set) var currentUser: AppUser?
-    private var currentUserListener: ListenerRegistration?
     
     init(userServices: UserServices) {
         self.remote = userServices.remote
@@ -38,8 +37,6 @@ class UserManager {
     }
     
     func signOut() {
-        currentUserListener?.remove()
-        currentUserListener = nil
         currentUser = nil
     }
     
@@ -50,8 +47,6 @@ class UserManager {
     }
     
     private func addCurrentUserListener(userId: String) {
-        currentUserListener?.remove()
-        
         Task {
             do {
                 for try await value in remote.streamUser(userId: userId) {

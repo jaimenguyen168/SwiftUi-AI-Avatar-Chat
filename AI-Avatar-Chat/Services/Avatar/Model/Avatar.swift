@@ -27,6 +27,10 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
         AvatarDescriptionBuilder(avatar: self).description
     }
     
+    static func aiDescription(_ avatar: Avatar) -> String {
+        "My name is \(avatar.name ?? "an avatar"), a/an \(avatar.description) with the intelligence of an AI. We are having a very casual conversation. You are my friend."
+    }
+    
     init(
         avatarId: String,
         name: String? = nil,

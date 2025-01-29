@@ -5,10 +5,10 @@
 //  Created by Dat Nguyen on 12/22/24.
 //
 
-import Foundation
+import IdentifiableByString
 import SwiftUI
 
-struct Chat: Identifiable, Hashable, Encodable {
+struct Chat: Identifiable, Hashable, Codable, StringIdentifiable {
     let id: String
     let userId: String
     let avatarId: String
@@ -23,9 +23,13 @@ struct Chat: Identifiable, Hashable, Encodable {
         case dateModified = "date_modified"
     }
     
+    static func getChatId(by userId: String, _ avatarId: String) -> String {
+        "\(userId)_\(avatarId)"
+    }
+    
     static func newChat(userId: String, avatarId: String) -> Self {
         .init(
-            id: "\(userId)_\(avatarId)",
+            id: getChatId(by: userId, avatarId),
             userId: userId,
             avatarId: avatarId,
             dateCreated: .now,

@@ -10,7 +10,9 @@ import FirebaseFirestore
 
 protocol ChatService: Sendable {
     func createNewChat(chat: Chat) async throws
+    func fetchChat(userId: String, avatarId: String) async throws -> Chat?
     func addChatMessage(chatId: String, message: ChatMessage) async throws
+    func streamChatMessages(chatId: String) -> AsyncThrowingStream<[ChatMessage], Error>
 }
 
 struct MockChatService: ChatService {
@@ -18,8 +20,18 @@ struct MockChatService: ChatService {
         
     }
     
+    func fetchChat(userId: String, avatarId: String) async throws -> Chat? {
+        .mock
+    }
+    
     func addChatMessage(chatId: String, message: ChatMessage) async throws {
         
+    }
+    
+    func streamChatMessages(chatId: String) -> AsyncThrowingStream<[ChatMessage], Error> {
+        AsyncThrowingStream { _ in
+            
+        }
     }
 }
 
@@ -37,6 +49,16 @@ struct FirebaseChatService: ChatService {
         try collection.document(chat.id).setData(from: chat, merge: true)
     }
     
+    func fetchChat(userId: String, avatarId: String) async throws -> Chat? {
+//        let result: [Chat] = try await collection
+//            .whereField(Chat.CodingKeys.userId.rawValue, isEqualTo: userId)
+//            .whereField(Chat.CodingKeys.avatarId.rawValue, isEqualTo: avatarId)
+//            .getAllDocuments()
+//        return result.first
+        
+        try await collection.getDocument(id: Chat.getChatId(by: userId, avatarId))
+    }
+    
     func addChatMessage(chatId: String, message: ChatMessage) async throws {
         try messagesCollection(for: chatId)
             .document(message.id)
@@ -47,6 +69,10 @@ struct FirebaseChatService: ChatService {
             .document(chatId)
             .updateData([Chat.CodingKeys.dateModified.rawValue: Date.now]
         )
+    }
+    
+    func streamChatMessages(chatId: String) -> AsyncThrowingStream<[ChatMessage], Error> {
+        messagesCollection(for: chatId).streamAllDocuments()
     }
 }
 
@@ -64,7 +90,15 @@ class ChatManager {
         try await service.createNewChat(chat: chat)
     }
     
+    func fetchChat(userId: String, avatarId: String) async throws -> Chat? {
+        try await service.fetchChat(userId: userId, avatarId: avatarId)
+    }
+    
     func addChatMessage(chatId: String, message: ChatMessage) async throws {
         try await service.addChatMessage(chatId: chatId, message: message)
+    }
+    
+    func streamChatMessages(chatId: String) -> AsyncThrowingStream<[ChatMessage], Error> {
+        service.streamChatMessages(chatId: chatId)
     }
 }
