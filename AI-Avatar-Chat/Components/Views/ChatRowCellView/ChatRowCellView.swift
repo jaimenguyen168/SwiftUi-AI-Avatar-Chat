@@ -30,12 +30,14 @@ struct ChatRowCellView: View {
             VStack(alignment: .leading, spacing: 4) {
                 if let headline {
                     Text(headline)
-                        .font(.headline)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
                 }
                 
                 if let subheadline {
                     Text(subheadline)
-                        .font(.subheadline)
+                        .font(.footnote)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }

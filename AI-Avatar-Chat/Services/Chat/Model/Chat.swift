@@ -48,8 +48,8 @@ struct Chat: Identifiable, Hashable, Codable, StringIdentifiable {
             let dateModified = dateCreated.addTimeInterval(hours: index * 2)
             return Chat(
                 id: UUID().uuidString,
-                userId: "user_\(index)",
-                avatarId: "avatar_\(index)",
+                userId: UserAuthInfo.mock().uid,
+                avatarId: Avatar.mocks.randomElement()!.avatarId,
                 dateCreated: dateCreated,
                 dateModified: dateModified
             )

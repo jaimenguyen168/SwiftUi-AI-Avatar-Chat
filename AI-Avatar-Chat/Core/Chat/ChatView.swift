@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ChatView: View {
     
-    var avatar: Avatar = .mock
+    var avatar: Avatar
+    @State var chat: Chat?
 
     @Environment(UserManager.self) private var userManager
     @Environment(AvatarManager.self) private var avatarManager
@@ -21,7 +22,6 @@ struct ChatView: View {
     
     @State private var chatMessages: [ChatMessage] = []
     @State private var currentUser: AppUser?
-    @State private var chat: Chat?
     
     @State private var showProfileModal = false
     @State private var isGeneratingResponse = false
@@ -38,7 +38,7 @@ struct ChatView: View {
             
             sendMessageSection
         }
-        .navigationTitle(avatar.name ?? "")
+        .navigationTitle(avatar.name ?? "Avatar")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -193,9 +193,7 @@ private extension ChatView {
             
             for try await value in chatManager.streamChatMessages(chatId: chatId) {
                 
-                chatMessages = value.sorted(by: {
-                    $0.dateCreatedCalculated < $1.dateCreatedCalculated
-                })
+                chatMessages = value.sortedByKeyPath(keyPath: \.dateCreatedCalculated, ascending: true)
             }
         } catch {
             print("DEBUG: Failed to listen for chat messages with error \(error.localizedDescription)")
@@ -328,14 +326,14 @@ private extension ChatView {
 
 #Preview("Working Chat") {
     NavigationStack {
-        ChatView()
+        ChatView(avatar: .mock)
             .previewAllEnvironments()
     }
 }
 
 #Preview("Slow AI Response") {
     NavigationStack {
-        ChatView()
+        ChatView(avatar: .mock)
             .environment(AIManager(aiService: MockAIService(delay: 10)))
             .previewAllEnvironments()
     }
@@ -343,7 +341,7 @@ private extension ChatView {
 
 #Preview("Failed Response") {
     NavigationStack {
-        ChatView()
+        ChatView(avatar: .mock)
             .environment(AIManager(aiService: MockAIService(delay: 2, showError: true)))
             .previewAllEnvironments()
     }

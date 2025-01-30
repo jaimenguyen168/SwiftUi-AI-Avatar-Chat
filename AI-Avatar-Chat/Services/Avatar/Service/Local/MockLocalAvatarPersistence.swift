@@ -9,6 +9,13 @@ import SwiftUI
 
 @MainActor
 struct MockLocalAvatarPersistence: LocalAvatarPersistence {
+    
+    let avatars: [Avatar]
+    
+    init(avatars: [Avatar] = Avatar.mocks) {
+        self.avatars = avatars
+    }
+    
     func removeAllRecentAvatars() throws {
         
     }
@@ -18,6 +25,6 @@ struct MockLocalAvatarPersistence: LocalAvatarPersistence {
     }
     
     func getRecentAvatars() throws -> [Avatar] {
-        Avatar.mocks.shuffled()
+        avatars
     }
 }

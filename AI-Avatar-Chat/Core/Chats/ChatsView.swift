@@ -10,25 +10,44 @@ import SwiftUI
 struct ChatsView: View {
     
     @Environment(AvatarManager.self) private var avatarManager
+    @Environment(ChatManager.self) private var chatManager
+    @Environment(AuthManager.self) private var authManager
     
-    @State private var chats: [Chat] = Chat.mocks
-    @State private var recentAvatars: [Avatar]?
+    @State private var chats: [Chat] = []
+    @State private var recentAvatars: [Avatar] = []
     @State private var option: NavigationCoreOption?
+    @State private var isChatsLoading = true
+    
+    @State private var showAlert: AppAlert?
+    
+    @State private var errorDisplayMessage = ""
     
     var body: some View {
         NavigationStack {
             List {
-                if let recentAvatars, !recentAvatars.isEmpty {
+                if !recentAvatars.isEmpty {
                     recentsSection
                 }
                 
-                chatsSection
+                if isChatsLoading {
+                    ProgressView()
+                        .padding(40)
+                        .frame(maxWidth: .infinity)
+                        .tint(.accent)
+                        .formatListRow()
+                } else {
+                    chatsSection
+                }
             }
             .listStyle(.grouped)
             .navigationTitle("Chats")
             .navigationDestinationCoreOption(option: $option)
+            .showCustomAlert(alert: $showAlert)
             .onAppear {
                 loadRecentAvatars()
+            }
+            .task {
+                await loadChats()
             }
         }
     }
@@ -39,7 +58,7 @@ private extension ChatsView {
         Section {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 8) {
-                    ForEach(recentAvatars ?? []) { avatar in
+                    ForEach(recentAvatars) { avatar in
                         VStack(spacing: 8) {
                             ZStack {
                                 if let imagename = avatar.profileImageUrl {
@@ -77,31 +96,25 @@ private extension ChatsView {
     var chatsSection: some View {
         Section {
             if chats.isEmpty {
-                Text("No chats yet")
+                Text(errorDisplayMessage)
+                    .formatListRow()
                     .foregroundStyle(.secondary)
                     .font(.title2)
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
-                    .removeBgAndInsetsListRow()
+                    .padding(.top, 36)
             } else {
                 ForEach(chats) { chat in
-                    let avatar = Avatar.mocks.randomElement()!
                     ChatRowCellViewBuilder(
-                        currentUserId: nil,
+                        currentUserId: authManager.authUser?.uid,
                         chat: chat,
                         getAvatar: {
-                            try? await Task.sleep(for: .seconds(1))
-                            return avatar
+                            try? await avatarManager.getAvatarById(chat.avatarId)
                         },
                         getLastChatMessage: {
-                            try? await Task.sleep(for: .seconds(1))
-                            return ChatMessage.mocks.randomElement()!
+                            try? await chatManager.getLastChatMessage(chatId: chat.id)
                         }
                     )
-                    .tappableBackground()
-                    .customButton(.pressable) {
-                        onChatPress(chat, avatar: avatar)
-                    }
                 }
                 .background(.white)
                 .customCornerRadius(12)
@@ -109,7 +122,7 @@ private extension ChatsView {
                 .padding(.horizontal)
             }
         } header: {
-            Text("Chats")
+            Text(chats.isEmpty ? "" : "Chats")
         }
     }
 }
@@ -123,17 +136,52 @@ private extension ChatsView {
         }
     }
     
-    func onAvatarPress(_ avatar: Avatar) {
-        option = .chat(avatar: avatar)
+    func loadChats() async {
+        do {
+            let uid = try authManager.getAuthId()
+            chats = try await chatManager
+                .fetchAllChats(userId: uid)
+                .sortedByKeyPath(keyPath: \.dateModified, ascending: false)
+            
+            if chats.isEmpty {
+                errorDisplayMessage = "No chats yet"
+            }
+        } catch {
+            print("DEBUG: failed to fetch chats with error \(error.localizedDescription)")
+            errorDisplayMessage = "Loading Error"
+            showAlert = AppAlert(error: error)
+        }
+        
+        isChatsLoading = false
     }
     
-    func onChatPress(_ chat: Chat, avatar: Avatar) {
-        option = .chat(avatar: avatar)
+    func onAvatarPress(_ avatar: Avatar) {
+        option = .chat(avatar: avatar, chat: nil)
     }
 }
 
-#Preview {
+#Preview("Has Data") {
     ChatsView()
-        .navigationTitle(TabBarItem.chats.rawValue.capitalized)
-        .environment(AvatarManager(avatarService: MockAvatarService()))
+        .previewAllEnvironments()
+}
+
+#Preview("No Data") {
+    ChatsView()
+        .environment(AvatarManager(
+            avatarService: MockAvatarService(avatars: []),
+            localService: MockLocalAvatarPersistence(avatars: [])))
+        .environment(ChatManager(service: MockChatService(chats: [])))
+        .previewAllEnvironments()
+}
+
+#Preview("Slow Loading") {
+    ChatsView()
+        .environment(ChatManager(service: MockChatService(delay: 5)))
+        .previewAllEnvironments()
+}
+
+#Preview("Error") {
+    ChatsView()
+        .environment(ChatManager(service: MockChatService(showError: true)))
+        .previewAllEnvironments()
 }

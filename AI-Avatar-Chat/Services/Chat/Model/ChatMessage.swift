@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import IdentifiableByString
 
-struct ChatMessage: Identifiable, Codable {
+struct ChatMessage: Identifiable, Codable, StringIdentifiable {
     let id: String
     let chatId: String
     let authorId: String?

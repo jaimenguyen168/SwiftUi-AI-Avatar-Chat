@@ -16,6 +16,7 @@ struct ChatRowCellViewBuilder: View {
     
     @State private var avatar: Avatar?
     @State private var lastChatMessage: ChatMessage?
+    @State private var option: NavigationCoreOption?
     
     @State private var didLoadAvatar = false
     @State private var didLoadLastChatMessage = false
@@ -48,6 +49,11 @@ struct ChatRowCellViewBuilder: View {
             subheadline: subheadline,
             hasNewMessage: isLoading ? false : hasNewMessage
         )
+        .tappableBackground()
+        .customButton(.pressable) {
+            onChatPress(chat, avatar: avatar)
+        }
+        .navigationDestinationCoreOption(option: $option)
         .redacted(reason: isLoading ? .placeholder : [])
         .task {
             avatar = await getAvatar()
@@ -57,6 +63,10 @@ struct ChatRowCellViewBuilder: View {
             lastChatMessage = await getLastChatMessage()
             didLoadLastChatMessage = true
         }
+    }
+    
+    private func onChatPress(_ chat: Chat, avatar: Avatar?) {
+        option = .chat(avatar: avatar, chat: chat)
     }
 }
 

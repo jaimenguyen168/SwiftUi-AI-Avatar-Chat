@@ -100,7 +100,7 @@ private extension CategoryListView {
     }
     
     func onAvatarPress(_ avatar: Avatar) {
-        option = .chat(avatar: avatar)
+        option = .chat(avatar: avatar, chat: nil)
     }
 }
 

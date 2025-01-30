@@ -8,8 +8,8 @@
 import SwiftUI
 import OpenAI
 
-//typealias ChatContent = ChatQuery.ChatCompletionMessageParam.ChatCompletionUserMessageParam.Content.VisionContent
-//typealias ChatText = ChatContent.ChatCompletionContentPartTextParam
+// typealias ChatContent = ChatQuery.ChatCompletionMessageParam.ChatCompletionUserMessageParam.Content.VisionContent
+// typealias ChatText = ChatContent.ChatCompletionContentPartTextParam
 
 struct OpenAIService: AIService {
     
