@@ -47,6 +47,10 @@ class MockChatService: ChatService {
         messages.append(message)
     }
     
+    func markChatMessageAsSeen(chatId: String, messageId: String, userId: String) async throws {
+        
+    }
+    
     func getLastChatMessage(chatId: String) async throws -> ChatMessage? {
         try await Task.sleep(for: .seconds(delay))
         try tryShowError()

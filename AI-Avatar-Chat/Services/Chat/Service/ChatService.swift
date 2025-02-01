@@ -12,10 +12,9 @@ protocol ChatService: Sendable {
     func fetchChat(userId: String, avatarId: String) async throws -> Chat?
     func fetchAllChats(userId: String) async throws -> [Chat]
     func addChatMessage(chatId: String, message: ChatMessage) async throws
+    func markChatMessageAsSeen(chatId: String, messageId: String, userId: String) async throws
     func getLastChatMessage(chatId: String) async throws -> ChatMessage?
-    
-    @MainActor
-    func streamChatMessages(chatId: String) -> AsyncThrowingStream<[ChatMessage], Error>
+    @MainActor func streamChatMessages(chatId: String) -> AsyncThrowingStream<[ChatMessage], Error>
     func deleteChat(chatId: String) async throws
     func deleteAllChatsForUser(userId: String) async throws
     func reportChat(report: ChatReport) async throws

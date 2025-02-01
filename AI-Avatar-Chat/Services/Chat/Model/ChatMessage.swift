@@ -115,7 +115,7 @@ struct ChatMessage: Identifiable, Codable, StringIdentifiable {
                     content: "Hey, how's it going?"
                 ),
                 seenByIds: [avatarId],
-                dateCreated: now.addTimeInterval(minutes: -50)
+                dateCreated: now.addTimeInterval(minutes: -300)
             ),
             ChatMessage(
                 id: UUID().uuidString,
@@ -126,7 +126,7 @@ struct ChatMessage: Identifiable, Codable, StringIdentifiable {
                     content: "Pretty good, how about you?"
                 ),
                 seenByIds: [userId],
-                dateCreated: now.addTimeInterval(minutes: -48)
+                dateCreated: now.addTimeInterval(minutes: -234)
             ),
             ChatMessage(
                 id: UUID().uuidString,
@@ -137,7 +137,7 @@ struct ChatMessage: Identifiable, Codable, StringIdentifiable {
                     content: "Not bad, just been busy with work lately."
                 ),
                 seenByIds: [avatarId],
-                dateCreated: now.addTimeInterval(minutes: -46)
+                dateCreated: now.addTimeInterval(minutes: -100)
             ),
             ChatMessage(
                 id: UUID().uuidString,

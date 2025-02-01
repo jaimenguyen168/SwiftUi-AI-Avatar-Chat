@@ -27,7 +27,7 @@ struct ChatRowCellViewBuilder: View {
     
     private var hasNewMessage: Bool {
         guard let lastChatMessage, let currentUserId else { return false }
-        return lastChatMessage.hasBeenSeenByCurrentUser(userId: currentUserId)
+        return !lastChatMessage.hasBeenSeenByCurrentUser(userId: currentUserId)
     }
     
     private var subheadline: String? {

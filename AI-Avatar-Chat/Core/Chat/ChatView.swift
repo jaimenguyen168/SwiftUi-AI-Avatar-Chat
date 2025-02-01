@@ -80,6 +80,10 @@ private extension ChatView {
                 ForEach(chatMessages) { message in
                     let isCurrentUser = message.authorId == authManager.authUser?.uid
                     
+                    if chatIsDelayed(message: message) {
+                        timestampView(date: message.dateCreatedCalculated)
+                    }
+                    
                     ChatBubbleViewBuilder(
                         message: message,
                         isCurrentUser: isCurrentUser,
@@ -90,6 +94,9 @@ private extension ChatView {
                         }
                     )
                     .padding(.bottom, chatMessages.last?.id == message.id ? 16 : 0)
+                    .onAppear {
+                        onMessageDidappear(message: message)
+                    }
                 }
             }
             .frame(maxWidth: .infinity)
@@ -103,6 +110,18 @@ private extension ChatView {
         .onChange(of: chatMessages.count) { _, _ in
             scrollToBottom()
         }
+    }
+    
+    func timestampView(date: Date) -> some View {
+        Group {
+            Text(date.formatted(date: .abbreviated, time: .omitted))
+            +
+            Text(" • ")
+            +
+            Text(date.formatted(date: .omitted, time: .shortened))
+        }
+        .foregroundStyle(.secondary)
+        .font(.callout)
     }
     
     var sendMessageSection: some View {
@@ -187,6 +206,26 @@ private extension ChatView {
             print("Chat loaded successfully")
         } catch {
             print("DEBUG: Failed to load chat with error \(error.localizedDescription)")
+        }
+    }
+    
+    func onMessageDidappear(message: ChatMessage) {
+        Task {
+            do {
+                let uid = try authManager.getAuthId()
+                let chatId = message.chatId
+                
+                guard !message.hasBeenSeenByCurrentUser(userId: uid) else { return }
+                
+                try await chatManager
+                    .markChatMessageAsSeen(
+                        chatId: chatId,
+                        messageId: message.id,
+                        userId: uid
+                    )
+            } catch {
+                print("DEBUG: Failed to mark as seen with error \(error.localizedDescription)")
+            }
         }
     }
     
@@ -372,6 +411,26 @@ private extension ChatView {
             throw ChatViewError.noChat
         }
         return chat.id
+    }
+    
+    func chatIsDelayed(message: ChatMessage) -> Bool {
+        let currentMessageDate = message.dateCreatedCalculated
+        
+        guard let index = chatMessages.firstIndex(
+            where: {
+                $0.id == message.id
+            }), chatMessages.indices.contains(
+                index - 1
+            ) else {
+            return false
+        }
+        
+        let previousMessageDate = chatMessages[index - 1].dateCreatedCalculated
+        let timeDiff = currentMessageDate.timeIntervalSince(previousMessageDate)
+        
+        let threshold: TimeInterval = 60 * 45 // 45 minutes
+        
+        return timeDiff > threshold
     }
 }
 
