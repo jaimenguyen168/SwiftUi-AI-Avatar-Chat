@@ -8,7 +8,7 @@
 import Foundation
 
 enum Character: String, Hashable, CaseIterable, Identifiable, Codable {
-    case man, woman, alien, robot, dog, cat
+    case man, woman, alien, robot, dog, cat, bird, dinasour
     
     static var `default`: Self { .alien }
     
@@ -22,6 +22,8 @@ enum Character: String, Hashable, CaseIterable, Identifiable, Codable {
         case .robot: "robots"
         case .dog: "dogs"
         case .cat: "cats"
+        case .bird: "birds"
+        case .dinasour: "dinosaures"
         }
     }
     
@@ -34,7 +36,7 @@ enum Character: String, Hashable, CaseIterable, Identifiable, Codable {
 }
 
 enum Action: String, CaseIterable, Hashable, Identifiable, Codable {
-    case smiling, siting, waving, running, eating, drinking, sleeping, working, dancing, relaxing
+    case smiling, siting, waving, swimming, flying, running, eating, drinking, sleeping, working, dancing, relaxing
     
     static var `default`: Self { .dancing }
     

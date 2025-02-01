@@ -11,12 +11,14 @@ struct ChatView: View {
     
     var avatar: Avatar
     @State var chat: Chat?
-
+    
     @Environment(UserManager.self) private var userManager
     @Environment(AvatarManager.self) private var avatarManager
     @Environment(AIManager.self) private var aiManager
     @Environment(AuthManager.self) private var authManager
     @Environment(ChatManager.self) private var chatManager
+    
+    @Environment(\.dismiss) private var dismiss
     
     @State private var currentAvatar: Avatar?
     
@@ -70,6 +72,7 @@ struct ChatView: View {
     }
 }
 
+// MARK: Views Section
 private extension ChatView {
     var chatScrollView: some View {
         ScrollView {
@@ -156,6 +159,7 @@ private extension ChatView {
     }
 }
 
+// MARK: Logic Section
 private extension ChatView {
     func loadCurrentUser() {
         currentUser = userManager.currentUser
@@ -202,6 +206,7 @@ private extension ChatView {
         scrollToBottom()
     }
     
+    // swiftlint:disable function_body_length
     func onSendMessagePress() {
         let content = textMessage
         
@@ -272,6 +277,7 @@ private extension ChatView {
             isGeneratingResponse = false
         }
     }
+    // swiftlint:enable function_body_length
     
     func createNewChat(uid: String, avatarId: String) async throws -> Chat {
         let newChat = Chat.newChat(
@@ -298,12 +304,57 @@ private extension ChatView {
             buttons: {
                 AnyView(
                     Group {
-                        Button("Report User / Chat", role: .destructive) {}
-                        Button("Delete Chat", role: .destructive) {}
+                        Button(
+                            "Report User / Chat",
+                            role: .destructive
+                        ) {
+                            onReportChatPress()
+                        }
+                        Button(
+                            "Delete Chat",
+                            role: .destructive
+                        ) {
+                            onDeleteChatPress()
+                        }
                     }
                 )
             }
         )
+    }
+    
+    func onDeleteChatPress() {
+        Task {
+            do {
+                let chatId = try getChatId()
+                try await chatManager.deleteChat(chatId: chatId)
+                dismiss()
+            } catch {
+                showAlert = .init(
+                    title: "Something went wrong!",
+                    subtitle: "Please try again later."
+                )
+            }
+        }
+    }
+    
+    func onReportChatPress() {
+        Task {
+            do {
+                let chatId = try getChatId()
+                let uid = try authManager.getAuthId()
+                try await chatManager.reportChat(chatId: chatId, userId: uid)
+                
+                showAlert = .init(
+                    title: "Reported!",
+                    subtitle: "Your report has been sent successfully. We will look into this matter. Thank you!"
+                )
+            } catch {
+                showAlert = .init(
+                    title: "Something went wrong!",
+                    subtitle: "Please try again later."
+                )
+            }
+        }
     }
     
     func onAvatarImagePress() {
@@ -314,6 +365,13 @@ private extension ChatView {
         withAnimation(.default) {
             scrollPosition = chatMessages.last?.id
         }
+    }
+    
+    func getChatId() throws -> String {
+        guard let chat else {
+            throw ChatViewError.noChat
+        }
+        return chat.id
     }
 }
 
