@@ -138,7 +138,7 @@ private extension ChatsView {
     
     func loadChats() async {
         do {
-            let uid = try authManager.getAuthId()
+            let uid = authManager.authUser?.uid ?? ""
             chats = try await chatManager
                 .fetchAllChats(userId: uid)
                 .sortedByKeyPath(keyPath: \.dateModified, ascending: false)

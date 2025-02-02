@@ -34,6 +34,8 @@ struct ChatView: View {
     @State private var showChatSettings: AppAlert?
     @State private var showAlert: AppAlert?
     
+    @State private var hasAppeared = false
+    
     var body: some View {
         VStack(spacing: 0) {
             chatScrollView
@@ -65,6 +67,7 @@ struct ChatView: View {
         .task {
             await loadChat()
             await listenForChatMessages()
+            hasAppeared = true
         }
         .onAppear {
             loadCurrentUser()
@@ -78,7 +81,7 @@ private extension ChatView {
         ScrollView {
             LazyVStack(spacing: 24) {
                 ForEach(chatMessages) { message in
-                    let isCurrentUser = message.authorId == authManager.authUser?.uid
+                    let isCurrentUser = message.authorId == currentUser?.userId
                     
                     if chatIsDelayed(message: message) {
                         timestampView(date: message.dateCreatedCalculated)
@@ -106,7 +109,7 @@ private extension ChatView {
         .defaultScrollAnchor(.bottom)
         .scrollPosition(id: $scrollPosition, anchor: .bottom)
         .animation(.default, value: scrollPosition)
-        .animation(.default, value: chatMessages.count)
+        .animation(hasAppeared ? .default : .easeIn, value: chatMessages.count)
         .onChange(of: chatMessages.count) { _, _ in
             scrollToBottom()
         }
@@ -241,8 +244,7 @@ private extension ChatView {
         } catch {
             print("DEBUG: Failed to listen for chat messages with error \(error.localizedDescription)")
         }
-        
-        scrollToBottom()
+
     }
     
     // swiftlint:disable function_body_length
@@ -251,7 +253,7 @@ private extension ChatView {
         
         Task {
             do {
-                let uid = try authManager.getAuthId()
+                let uid = currentUser?.userId ?? ""
                 let avatarId = currentAvatar?.avatarId ?? ""
                 
                 try TextValidationHelper.validateText(text: content)
@@ -401,7 +403,11 @@ private extension ChatView {
     }
     
     func scrollToBottom() {
-        withAnimation(.default) {
+        if hasAppeared {
+            withAnimation(.default) {
+                scrollPosition = chatMessages.last?.id
+            }
+        } else {
             scrollPosition = chatMessages.last?.id
         }
     }
