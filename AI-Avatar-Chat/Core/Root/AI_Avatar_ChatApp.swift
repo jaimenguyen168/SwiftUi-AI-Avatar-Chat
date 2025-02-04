@@ -36,10 +36,26 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp
             .configure()
         
-        dependencies = Dependency()
+        #if MOCK
+        // MARK: - Mock Dependency Scheme
+        dependencies = Dependency(.mock(isSignedIn: true))
+        
+        #elseif DEV
+        // MARK: - Production Dependency Scheme + Extra Dev Tools
+        dependencies = Dependency(.development)
+        
+        #else
+        // MARK: - Production Dependency Scheme
+        dependencies = Dependency(.production)
+        
+        #endif
 
     return true
   }
+}
+
+enum BuildConfiguration {
+    case mock(isSignedIn: Bool), development, production
 }
 
 @MainActor
@@ -50,43 +66,39 @@ struct Dependency {
     let avatarManager: AvatarManager
     let chatManager: ChatManager
     
-    init() {
-        
-        #if DEBUG
-        self.authManager = AuthManager(
-            authService: MockAuthService()
-        )
-        self.userManager = UserManager(
-            userServices: MockUserServices(user: .mock)
-        )
-        self.aiManager = AIManager(
-            aiService: MockAIService(delay: 2)
-        )
-        self.avatarManager = AvatarManager(
-            avatarService: MockAvatarService(),
-            localService: MockLocalAvatarPersistence()
-        )
-        self.chatManager = ChatManager(
-            service: MockChatService()
-        )
-        #else
-        self.authManager = AuthManager(
-            authService: FirebaseAuthService()
-        )
-        self.userManager = UserManager(
-            userServices: ProductionUserServices()
-        )
-        self.aiManager = AIManager(
-            aiService: OpenAIService()
-        )
-        self.avatarManager = AvatarManager(
-            avatarService: FirebaseAvatarService(),
-            localService: SwiftDataLocalAvatarPersistence()
-        )
-        self.chatManager = ChatManager(
-            service: FirebaseChatService()
-        )
-        #endif
+    init(_ config: BuildConfiguration) {
+        switch config {
+        case .mock(isSignedIn: let isSignedIn):
+            self.authManager = AuthManager(authService: MockAuthService(
+                authUser: isSignedIn ? .mock() : nil))
+            self.userManager = UserManager(userServices: MockUserServices(
+                user: isSignedIn ? .mock : nil))
+            self.aiManager = AIManager(aiService: MockAIService(delay: 2))
+            self.avatarManager = AvatarManager(
+                avatarService: MockAvatarService(),
+                localService: MockLocalAvatarPersistence()
+            )
+            self.chatManager = ChatManager(service: MockChatService())
+        case .development:
+            self.authManager = AuthManager(authService: FirebaseAuthService())
+            self.userManager = UserManager(userServices: ProductionUserServices())
+            self.aiManager = AIManager(aiService: OpenAIService())
+            self.avatarManager = AvatarManager(
+                avatarService: FirebaseAvatarService(),
+                localService: SwiftDataLocalAvatarPersistence()
+            )
+            self.chatManager = ChatManager(service: FirebaseChatService())
+        case .production:
+            self.authManager = AuthManager(authService: FirebaseAuthService())
+            self.userManager = UserManager(userServices: ProductionUserServices())
+            self.aiManager = AIManager(aiService: OpenAIService())
+            self.avatarManager = AvatarManager(
+                avatarService: FirebaseAvatarService(),
+                localService: SwiftDataLocalAvatarPersistence()
+            )
+            self.chatManager = ChatManager(service: FirebaseChatService())
+            print("production is running...")
+        }
     }
 }
 
