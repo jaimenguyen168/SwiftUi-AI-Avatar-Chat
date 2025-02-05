@@ -33,22 +33,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        FirebaseApp
-            .configure()
+        
+        let config: BuildConfiguration
         
         #if MOCK
         // MARK: - Mock Dependency Scheme
-        dependencies = Dependency(.mock(isSignedIn: true))
+        config = .mock(isSignedIn: true)
         
         #elseif DEV
         // MARK: - Production Dependency Scheme + Extra Dev Tools
-        dependencies = Dependency(.development)
+        config = .development
         
         #else
         // MARK: - Production Dependency Scheme
-        dependencies = Dependency(.production)
+        config = .production
         
         #endif
+        
+        config.configure()
+        dependencies = Dependency(config)
 
     return true
   }
@@ -56,6 +59,21 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 enum BuildConfiguration {
     case mock(isSignedIn: Bool), development, production
+    
+    func configure() {
+        switch self {
+        case .mock(let isSignedIn):
+            break
+        case .development:
+            let plist = Bundle.main.path(forResource: "GoogleService-Info-Dev", ofType: "plist")!
+            let options = FirebaseOptions(contentsOfFile: plist)!
+            FirebaseApp.configure(options: options)
+        case .production:
+            let plist = Bundle.main.path(forResource: "GoogleService-Info-Prod", ofType: "plist")!
+            let options = FirebaseOptions(contentsOfFile: plist)!
+            FirebaseApp.configure(options: options)
+        }
+    }
 }
 
 @MainActor
