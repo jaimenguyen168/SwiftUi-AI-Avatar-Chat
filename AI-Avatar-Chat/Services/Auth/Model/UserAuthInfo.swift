@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct UserAuthInfo: Sendable {
+struct UserAuthInfo: Sendable, Codable {
     let uid: String
     let email: String?
     let isAnonymous: Bool
@@ -36,5 +36,25 @@ struct UserAuthInfo: Sendable {
             creationDate: .now,
             lastSignInDate: .now
         )
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case uid
+        case email
+        case isAnonymous = "is_anonymous"
+        case creationDate = "creation_date"
+        case lastSignInDate = "last_sign_in_date"
+    }
+    
+    var eventParameters: [String: Any] {
+        let dict: [String: Any?] = [
+            "uAuth_\(CodingKeys.uid.rawValue)": uid,
+            "uAuth_\(CodingKeys.email.rawValue)": email,
+            "uAuth_\(CodingKeys.isAnonymous.rawValue)": isAnonymous,
+            "uAuth_\(CodingKeys.creationDate.rawValue)": creationDate,
+            "uAuth_\(CodingKeys.lastSignInDate.rawValue)": lastSignInDate
+        ]
+        
+        return dict.compactMapValues { $0 } // drop values if nil
     }
 }

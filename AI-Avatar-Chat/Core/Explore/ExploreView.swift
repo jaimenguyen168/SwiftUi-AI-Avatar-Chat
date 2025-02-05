@@ -22,6 +22,15 @@ struct ExploreView: View {
     
     @State private var option: NavigationCoreOption?
     
+    private var showDevSettingsButton: Bool {
+        #if DEV || MOCK
+        return true
+        #else
+        return false
+        #endif
+    }
+    @State private var showDevSettings = false
+    
     var body: some View {
         NavigationStack {
             List {
@@ -48,6 +57,16 @@ struct ExploreView: View {
             }
             .listStyle(.grouped)
             .navigationTitle("Explore")
+            .toolbar(content: {
+                ToolbarItem(placement: .topBarLeading) {
+                    if showDevSettingsButton {
+                        devSettingsButton
+                    }
+                }
+            })
+            .sheet(isPresented: $showDevSettings, content: {
+                DevSettingsView()
+            })
             .navigationDestinationCoreOption(option: $option)
             .task {
                 await loadFeaturedAvatars()
@@ -167,6 +186,14 @@ private extension ExploreView {
                 .textCase(.uppercase)
         }
     }
+    
+    var devSettingsButton: some View {
+        Text("DEV 🤐")
+            .blueBadge()
+            .customButton(.pressable) {
+                onDevSettingsPress()
+            }
+    }
 }
 
 // MARK: Logic Section
@@ -220,6 +247,10 @@ private extension ExploreView {
         Task {
             await loadPopularAvatars()
         }
+    }
+    
+    func onDevSettingsPress() {
+        showDevSettings = true
     }
 }
 
