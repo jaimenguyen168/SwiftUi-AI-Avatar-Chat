@@ -199,6 +199,7 @@ struct CreateAvatarView: View {
                 dismiss()
             } catch {
                 print("DEBUG: \(error.localizedDescription)")
+                showAlert = .init(error: error)
             }
             
             isSaving = false

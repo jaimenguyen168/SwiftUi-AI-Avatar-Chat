@@ -21,6 +21,7 @@ struct AIAvatarChatApp: App {
                 .environment(delegate.dependencies.avatarManager)
                 .environment(delegate.dependencies.userManager)
                 .environment(delegate.dependencies.authManager)
+                .environment(delegate.dependencies.logManager)
         }
     }
 }
@@ -62,7 +63,7 @@ enum BuildConfiguration {
     
     func configure() {
         switch self {
-        case .mock(let isSignedIn):
+        case .mock:
             break
         case .development:
             let plist = Bundle.main.path(forResource: "GoogleService-Info-Dev", ofType: "plist")!
@@ -84,6 +85,8 @@ struct Dependency {
     let avatarManager: AvatarManager
     let chatManager: ChatManager
     
+    let logManager: LogManager
+    
     init(_ config: BuildConfiguration) {
         switch config {
         case .mock(isSignedIn: let isSignedIn):
@@ -97,6 +100,10 @@ struct Dependency {
                 localService: MockLocalAvatarPersistence()
             )
             self.chatManager = ChatManager(service: MockChatService())
+            self.logManager = LogManager(services: [
+                ConsoleService()
+            ])
+            
         case .development:
             self.authManager = AuthManager(authService: FirebaseAuthService())
             self.userManager = UserManager(userServices: ProductionUserServices())
@@ -106,6 +113,10 @@ struct Dependency {
                 localService: SwiftDataLocalAvatarPersistence()
             )
             self.chatManager = ChatManager(service: FirebaseChatService())
+            self.logManager = LogManager(services: [
+                ConsoleService()
+            ])
+            
         case .production:
             self.authManager = AuthManager(authService: FirebaseAuthService())
             self.userManager = UserManager(userServices: ProductionUserServices())
@@ -115,7 +126,7 @@ struct Dependency {
                 localService: SwiftDataLocalAvatarPersistence()
             )
             self.chatManager = ChatManager(service: FirebaseChatService())
-            print("production is running...")
+            self.logManager = LogManager()
         }
     }
 }
@@ -129,6 +140,7 @@ extension View {
             .environment(UserManager(userServices: MockUserServices(user: isSignIn ? .mock : nil)))
             .environment(AuthManager(authService: MockAuthService(authUser: isSignIn ? .mock() : nil)))
             .environment(AppState())
+            .environment(LogManager(services: []))
     }
 }
 

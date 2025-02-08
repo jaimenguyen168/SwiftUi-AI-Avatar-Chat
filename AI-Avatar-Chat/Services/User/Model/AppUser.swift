@@ -72,11 +72,11 @@ struct AppUser: Codable {
             "user_\(CodingKeys.userId.rawValue)": userId,
             "user_\(CodingKeys.email.rawValue)": email,
             "user_\(CodingKeys.isAnonymous.rawValue)": isAnonymous,
-            "user_\(CodingKeys.creationDate.rawValue)": creationDate,
+            "user_\(CodingKeys.creationDate.rawValue)": creationDate?.description,
             "user_\(CodingKeys.creationVersion.rawValue)": creationVersion,
             "user_\(CodingKeys.lastSignInDate.rawValue)": lastSignInDate,
-            "user_\(CodingKeys.didCompleteOnboarding.rawValue)": didCompleteOnboarding,
-            "user_\(CodingKeys.profileColorHex.rawValue)": profileColorHex,
+            "user_\(CodingKeys.didCompleteOnboarding.rawValue)": didCompleteOnboarding?.description,
+            "user_\(CodingKeys.profileColorHex.rawValue)": profileColorHex
         ]
         
         return dict.compactMapValues { $0 } // drop values if nil
