@@ -30,17 +30,10 @@ struct AppView: View {
             await checkUserAuthentication()
         }
         .onAppear {
-            logManager
-                .identifyUser(
-                    userId: "user123",
-                    name: "Jaime",
-                    email: "jaime@gmail.com"
-                )
-            
-            logManager
-                .addUserProperties(
-                    dict: AppUser.mock.eventParameters
-            )
+            logManager.trackEvent(event: Event.alpha)
+            logManager.trackEvent(event: Event.beta)
+            logManager.trackEvent(event: Event.gamma)
+            logManager.trackEvent(event: Event.delta)
         }
         .onChange(of: appState.showTabBar) { _, showTabBar in
             if !showTabBar {
@@ -52,6 +45,39 @@ struct AppView: View {
     }
 }
 
+// MARK: Additional Data Section
+private extension AppView {
+    enum Event: LoggableEvent {
+        case alpha, beta, gamma, delta
+        
+        var eventName: String {
+            switch self {
+            case .alpha: "Alpha"
+            case .beta: "Beta"
+            case .gamma: "Gamma"
+            case .delta: "Delta"
+            }
+        }
+        
+        var parameters: [String: Any]? {
+            switch self {
+            case .alpha, .beta: return ["aaa": 111, "bbb": true]
+            default: return nil
+            }
+        }
+        
+        var logType: LogType {
+            switch self {
+            case .alpha: .info
+            case .beta: .analytic
+            case .gamma: .warning
+            case .delta: .severe
+            }
+        }
+    }
+}
+
+// MARK: Logic Section
 private extension AppView {
     func checkUserAuthentication() async {
         if let user = authManager.authUser {

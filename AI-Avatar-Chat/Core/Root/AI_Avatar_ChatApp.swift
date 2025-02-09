@@ -101,7 +101,7 @@ struct Dependency {
             )
             self.chatManager = ChatManager(service: MockChatService())
             self.logManager = LogManager(services: [
-                ConsoleService()
+                ConsoleService(printParameters: false)
             ])
             
         case .development:
