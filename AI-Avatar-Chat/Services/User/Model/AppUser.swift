@@ -75,7 +75,7 @@ struct AppUser: Codable {
             "user_\(CodingKeys.creationDate.rawValue)": creationDate?.description,
             "user_\(CodingKeys.creationVersion.rawValue)": creationVersion,
             "user_\(CodingKeys.lastSignInDate.rawValue)": lastSignInDate,
-            "user_\(CodingKeys.didCompleteOnboarding.rawValue)": didCompleteOnboarding?.description,
+            "user_\(CodingKeys.didCompleteOnboarding.rawValue)": didCompleteOnboarding,
             "user_\(CodingKeys.profileColorHex.rawValue)": profileColorHex
         ]
         

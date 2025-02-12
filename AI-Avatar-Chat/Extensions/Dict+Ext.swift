@@ -14,3 +14,17 @@ extension Dictionary where Key == String, Value == Any {
             .sortedByKeyPath(keyPath: \.key)
     }
 }
+
+extension Dictionary where Key == String {
+    mutating func first(upTo maxItems: Int) {
+        var counter = 0
+        
+        for (key, _) in self {
+            if counter >= maxItems {
+                removeValue(forKey: key)
+            } else {
+                counter += 1
+            }
+        }
+    }
+}

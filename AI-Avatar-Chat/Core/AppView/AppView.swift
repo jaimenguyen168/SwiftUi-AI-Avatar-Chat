@@ -30,10 +30,28 @@ struct AppView: View {
             await checkUserAuthentication()
         }
         .onAppear {
+            logManager.identifyUser(
+                userId: "123456789",
+                name: "Jaime",
+                email: "jaime@gmail.com"
+            )
+            
+            logManager.addUserProperties(dict: AppUser
+                .mock.eventParameters)
+            
             logManager.trackEvent(event: Event.alpha)
             logManager.trackEvent(event: Event.beta)
             logManager.trackEvent(event: Event.gamma)
             logManager.trackEvent(event: Event.delta)
+            
+            let event = AnyLoggableEvent(
+                eventName: "NewCreatedEvent",
+                parameters: AppUser.mock.eventParameters,
+                logType: .analytic
+            )
+            
+            logManager.trackEvent(event: event)
+            logManager.trackEvent(eventName: "AnotherNewCreatedEvent")
         }
         .onChange(of: appState.showTabBar) { _, showTabBar in
             if !showTabBar {

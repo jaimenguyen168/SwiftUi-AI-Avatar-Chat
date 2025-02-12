@@ -23,15 +23,36 @@ class LogManager {
         }
     }
     
-    func addUserProperties(dict: [String: Any]) {
+    func addUserProperties(dict: [String: Any], isHighPriority: Bool = false) {
         for service in services {
-            service.addUserProperties(dict: dict)
+            service.addUserProperties(dict: dict, isHighPriority: isHighPriority)
         }
     }
     
     func deleteUserProfile() {
         for service in services {
             service.deleteUserProfile()
+        }
+    }
+    
+    func trackEvent(
+        eventName: String,
+        parameters: [String: Any]? = nil,
+        logType: LogType = .analytic
+    ) {
+        let event = AnyLoggableEvent(
+            eventName: eventName,
+            parameters: parameters,
+            logType: logType
+        )
+        for service in services {
+            service.trackEvent(event: event)
+        }
+    }
+    
+    func trackEvent(event: AnyLoggableEvent) {
+        for service in services {
+            service.trackEvent(event: event)
         }
     }
 

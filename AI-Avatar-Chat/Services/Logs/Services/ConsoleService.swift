@@ -80,9 +80,9 @@ struct ConsoleService: LogService {
         logger.log(level: LogType.info, message: resultString)
     }
     
-    func addUserProperties(dict: [String: Any]) {
+    func addUserProperties(dict: [String: Any], isHighPriority: Bool) {
         var resultString = """
-📈 Log User Properties:
+📈 Log User Properties (isHighPriority: \(isHighPriority.description))
 """
         if printParameters {
             let sortedKeys = dict.keys.sorted()

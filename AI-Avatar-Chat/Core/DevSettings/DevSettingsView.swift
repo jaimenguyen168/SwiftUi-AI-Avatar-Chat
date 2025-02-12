@@ -49,10 +49,8 @@ private extension DevSettingsView {
             Text(item.key)
             Spacer(minLength: 4)
             
-            if let value = item.value as? Date {
-                Text(value.formatted())
-            } else {
-                Text(String(describing: item.value))
+            if let value = String.convertToString(item.value) {
+                Text(value)
             }
         }
         .font(.footnote)
