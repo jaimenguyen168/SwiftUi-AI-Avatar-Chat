@@ -14,6 +14,7 @@
 		AA43877A2D1A91B500D56572 /* SwiftfulUtilities in Frameworks */ = {isa = PBXBuildFile; productRef = AA4387792D1A91B500D56572 /* SwiftfulUtilities */; };
 		AA43877C2D1A91E500D56572 /* SwiftfulUtilities in Frameworks */ = {isa = PBXBuildFile; productRef = AA43877B2D1A91E500D56572 /* SwiftfulUtilities */; };
 		AA50AC652D3C257900DEB93E /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = AA50AC642D3C257900DEB93E /* FirebaseStorage */; };
+		AAA5D82F2D5D17A500921CED /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = AAA5D82E2D5D17A500921CED /* Mixpanel */; };
 		AAEA48EE2D36E8C900ECF0C5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AAEA48ED2D36E8C900ECF0C5 /* FirebaseFirestore */; };
 		AAEA48F12D38209800ECF0C5 /* SwiftfulFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AAEA48F02D38209800ECF0C5 /* SwiftfulFirestore */; };
 		AAEA490E2D3ADEB100ECF0C5 /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = AAEA490D2D3ADEB100ECF0C5 /* OpenAI */; };
@@ -88,6 +89,7 @@
 				AAEA48EE2D36E8C900ECF0C5 /* FirebaseFirestore in Frameworks */,
 				AA3350C62D592BF2007219EE /* FirebaseAnalytics in Frameworks */,
 				AAEA48F12D38209800ECF0C5 /* SwiftfulFirestore in Frameworks */,
+				AAA5D82F2D5D17A500921CED /* Mixpanel in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -167,6 +169,7 @@
 				AAEA490D2D3ADEB100ECF0C5 /* OpenAI */,
 				AA50AC642D3C257900DEB93E /* FirebaseStorage */,
 				AA3350C52D592BF2007219EE /* FirebaseAnalytics */,
+				AAA5D82E2D5D17A500921CED /* Mixpanel */,
 			);
 			productName = "AI-Avatar-Chat";
 			productReference = AAB7FE9E2D148E56003BFA2D /* AI-Avatar-Chat.app */;
@@ -257,6 +260,7 @@
 				AA2A28BE2D32E7E800A33CAD /* XCRemoteSwiftPackageReference "SignInAppleAsync" */,
 				AAEA48EF2D38209800ECF0C5 /* XCRemoteSwiftPackageReference "SwiftfulFirestore" */,
 				AAEA490C2D3ADEB100ECF0C5 /* XCRemoteSwiftPackageReference "OpenAI" */,
+				AAA5D82D2D5D17A500921CED /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AAB7FE9F2D148E56003BFA2D /* Products */;
@@ -876,6 +880,14 @@
 				minimumVersion = 1.1.5;
 			};
 		};
+		AAA5D82D2D5D17A500921CED /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mixpanel/mixpanel-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
 		AAEA48EF2D38209800ECF0C5 /* XCRemoteSwiftPackageReference "SwiftfulFirestore" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SwiftfulThinking/SwiftfulFirestore.git";
@@ -927,6 +939,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA2A28B12D319CEF00A33CAD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		AAA5D82E2D5D17A500921CED /* Mixpanel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAA5D82D2D5D17A500921CED /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
+			productName = Mixpanel;
 		};
 		AAEA48ED2D36E8C900ECF0C5 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
