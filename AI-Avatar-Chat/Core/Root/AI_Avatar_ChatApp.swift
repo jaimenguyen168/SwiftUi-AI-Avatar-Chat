@@ -116,7 +116,8 @@ struct Dependency {
             self.logManager = LogManager(services: [
                 ConsoleService(),
                 FirebaseAnalyticsService(),
-                MixPanelService(token: Tokens.mixPanelToken)
+                MixPanelService(token: Tokens.mixPanelToken),
+                FirebaseCrashlyticsService()
             ])
             
         case .production:
@@ -130,7 +131,8 @@ struct Dependency {
             self.chatManager = ChatManager(service: FirebaseChatService())
             self.logManager = LogManager(services: [
                 FirebaseAnalyticsService(),
-                MixPanelService(token: Tokens.mixPanelToken)
+                MixPanelService(token: Tokens.mixPanelToken),
+                FirebaseCrashlyticsService()
             ])
         }
     }

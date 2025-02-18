@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA20754D2D64ED3D0067D6BA /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = AA20754C2D64ED3D0067D6BA /* FirebaseCrashlytics */; };
 		AA2A28B32D319CEF00A33CAD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AA2A28B22D319CEF00A33CAD /* FirebaseAuth */; };
 		AA2A28C02D32E7E800A33CAD /* SignInAppleAsync in Frameworks */ = {isa = PBXBuildFile; productRef = AA2A28BF2D32E7E800A33CAD /* SignInAppleAsync */; };
 		AA3350C62D592BF2007219EE /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = AA3350C52D592BF2007219EE /* FirebaseAnalytics */; };
@@ -88,6 +89,7 @@
 				AA2A28C02D32E7E800A33CAD /* SignInAppleAsync in Frameworks */,
 				AAEA48EE2D36E8C900ECF0C5 /* FirebaseFirestore in Frameworks */,
 				AA3350C62D592BF2007219EE /* FirebaseAnalytics in Frameworks */,
+				AA20754D2D64ED3D0067D6BA /* FirebaseCrashlytics in Frameworks */,
 				AAEA48F12D38209800ECF0C5 /* SwiftfulFirestore in Frameworks */,
 				AAA5D82F2D5D17A500921CED /* Mixpanel in Frameworks */,
 			);
@@ -147,8 +149,9 @@
 			buildPhases = (
 				AAB7FE9A2D148E56003BFA2D /* Sources */,
 				AAB7FE9B2D148E56003BFA2D /* Frameworks */,
-				AAB7FE9C2D148E56003BFA2D /* Resources */,
 				AAB7FED22D149AA6003BFA2D /* ShellScript */,
+				AAB7FE9C2D148E56003BFA2D /* Resources */,
+				AA20754E2D64EE930067D6BA /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -170,6 +173,7 @@
 				AA50AC642D3C257900DEB93E /* FirebaseStorage */,
 				AA3350C52D592BF2007219EE /* FirebaseAnalytics */,
 				AAA5D82E2D5D17A500921CED /* Mixpanel */,
+				AA20754C2D64ED3D0067D6BA /* FirebaseCrashlytics */,
 			);
 			productName = "AI-Avatar-Chat";
 			productReference = AAB7FE9E2D148E56003BFA2D /* AI-Avatar-Chat.app */;
@@ -299,6 +303,30 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		AA20754E2D64EE930067D6BA /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}.debug.dylib",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CONFIGURATION}\" == \"Debug\" ]; then\n  GOOGLE_SERVICE_INFO_PLIST=\"${PROJECT_DIR}/AI-Avatar-Chat/GoogleServicesConfigs/GoogleService-Info-Dev.plist\"\nelif [ \"${CONFIGURATION}\" == \"Mock\" ]; then\n  echo \"Skipping Crashlytics upload for Mock configuration.\"\n  exit 0  # Use `exit 0` if `return` does not work in your environment\nelif [ \"${CONFIGURATION}\" == \"Release\" ]; then\n  GOOGLE_SERVICE_INFO_PLIST=\"${PROJECT_DIR}/AI-Avatar-Chat/GoogleServicesConfigs/GoogleService-Info-Prod.plist\"\nelse\n  echo \"No matching build configuration found for GoogleService-Info.plist!\"\n  exit 1\nfi\n\n# Run the Crashlytics script with the selected plist file\n\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\" -gsp \"${GOOGLE_SERVICE_INFO_PLIST}\"\n";
+		};
 		AAB7FED22D149AA6003BFA2D /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -481,6 +509,7 @@
 				CODE_SIGN_ENTITLEMENTS = "AI-Avatar-Chat/AI_Avatar_Chat.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"AI-Avatar-Chat/Preview Content\"";
 				DEVELOPMENT_TEAM = V68G6QN9H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -488,7 +517,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AI-Avatar-Chat/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Avatar Chat";
+				INFOPLIST_KEY_CFBundleDisplayName = "AI Chat - Dev";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -505,6 +534,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jaimenguyen.AI-Avatar-Chat.dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -525,6 +555,7 @@
 				CODE_SIGN_ENTITLEMENTS = "AI-Avatar-Chat/AI_Avatar_Chat.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"AI-Avatar-Chat/Preview Content\"";
 				DEVELOPMENT_TEAM = V68G6QN9H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -532,7 +563,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AI-Avatar-Chat/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Avatar Chat";
+				INFOPLIST_KEY_CFBundleDisplayName = "AI Chat";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -549,6 +580,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jaimenguyen.AI-Avatar-Chat";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -721,6 +753,7 @@
 				CODE_SIGN_ENTITLEMENTS = "AI-Avatar-Chat/AI_Avatar_Chat.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"AI-Avatar-Chat/Preview Content\"";
 				DEVELOPMENT_TEAM = V68G6QN9H5;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -728,7 +761,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AI-Avatar-Chat/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Avatar Chat";
+				INFOPLIST_KEY_CFBundleDisplayName = "AI Chat - Mock";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -745,6 +778,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jaimenguyen.AI-Avatar-Chat.mock";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -907,6 +941,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AA20754C2D64ED3D0067D6BA /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA2A28B12D319CEF00A33CAD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
 		AA2A28B22D319CEF00A33CAD /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AA2A28B12D319CEF00A33CAD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
