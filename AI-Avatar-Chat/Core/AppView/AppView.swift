@@ -29,30 +29,7 @@ struct AppView: View {
         .task {
             await checkUserAuthentication()
         }
-        .onAppear {
-            logManager.identifyUser(
-                userId: "123456789",
-                name: "Jaime",
-                email: "jaime@gmail.com"
-            )
-            
-            logManager.addUserProperties(dict: AppUser
-                .mock.eventParameters)
-            
-            logManager.trackEvent(event: Event.alpha)
-            logManager.trackEvent(event: Event.beta)
-            logManager.trackEvent(event: Event.gamma)
-            logManager.trackEvent(event: Event.delta)
-            
-            let event = AnyLoggableEvent(
-                eventName: "NewCreatedEvent",
-                parameters: AppUser.mock.eventParameters,
-                logType: .analytic
-            )
-            
-            logManager.trackEvent(event: event)
-            logManager.trackEvent(eventName: "AnotherNewCreatedEvent")
-        }
+        .screenAppearAnalytics(name: "AppView")
         .onChange(of: appState.showTabBar) { _, showTabBar in
             if !showTabBar {
                 Task {
@@ -66,30 +43,34 @@ struct AppView: View {
 // MARK: Additional Data Section
 private extension AppView {
     enum Event: LoggableEvent {
-        case alpha, beta, gamma, delta
+        case existingAuthStart
+        case existingAuthFailed(error: Error)
+        case anonAuthStart
+        case anonAuthSuccess
+        case anonAuthFailed(error: Error)
         
         var eventName: String {
             switch self {
-            case .alpha: "Alpha"
-            case .beta: "Beta"
-            case .gamma: "Gamma"
-            case .delta: "Delta"
+            case .existingAuthStart: "AppView_ExistingAuth_Start"
+            case .existingAuthFailed: "AppView_ExistingAuth_Failed"
+            case .anonAuthStart: "AppView_AnonAuth_Start"
+            case .anonAuthSuccess: "AppView_AnonAuth_Success"
+            case .anonAuthFailed: "AppView_AnonAuth_Failed"
             }
         }
         
         var parameters: [String: Any]? {
             switch self {
-            case .alpha, .beta: return ["aaa": 111, "bbb": true]
+            case .existingAuthFailed(error: let error), .anonAuthFailed(error: let error):
+                return error.eventParameters
             default: return nil
             }
         }
         
         var logType: LogType {
             switch self {
-            case .alpha: .info
-            case .beta: .analytic
-            case .gamma: .warning
-            case .delta: .severe
+            case .existingAuthFailed, .anonAuthFailed: .severe
+            default: .analytic
             }
         }
     }
@@ -99,23 +80,25 @@ private extension AppView {
 private extension AppView {
     func checkUserAuthentication() async {
         if let user = authManager.authUser {
-            print("User authenticated: \(user.uid)")
+            logManager.trackEvent(event: Event.existingAuthStart)
             
             do {
                 try await userManager.login(userAuth: user, isNewUser: false)
             } catch {
-                print("DEBUG: failed to log in for existing user \(error.localizedDescription)")
+                logManager.trackEvent(event: Event.existingAuthFailed(error: error))
                 try? await Task.sleep(for: .seconds(2))
                 await checkUserAuthentication()
             }
         } else {
+            logManager.trackEvent(event: Event.anonAuthStart)
+            
             do {
                 let result = try await authManager.signInAnonymously()
-                print("Sign in anonymously: \(result.user.uid)")
                 
+                logManager.trackEvent(event: Event.anonAuthSuccess)
                 try await userManager.login(userAuth: result.user, isNewUser: result.isNewUser)
             } catch {
-                print("DEBUG: failed to sign in anonymously \(error)")
+                logManager.trackEvent(event: Event.anonAuthFailed(error: error))
                 try? await Task.sleep(for: .seconds(2))
                 await checkUserAuthentication()
             }

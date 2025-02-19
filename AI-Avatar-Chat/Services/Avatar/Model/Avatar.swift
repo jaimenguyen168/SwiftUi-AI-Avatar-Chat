@@ -69,6 +69,22 @@ struct Avatar: Hashable, Codable, StringIdentifiable {
         case viewCount = "view_count"
     }
     
+    var eventParameters: [String: Any] {
+        let dict: [String: Any?] = [
+            "avatar_\(CodingKeys.id.rawValue)": avatarId,
+            "avatar_\(CodingKeys.name.rawValue)": name,
+            "avatar_\(CodingKeys.character.rawValue)": character?.rawValue,
+            "avatar_\(CodingKeys.action.rawValue)": action?.rawValue,
+            "avatar_\(CodingKeys.location.rawValue)": location?.rawValue,
+            "avatar_\(CodingKeys.profileImageUrl.rawValue)": profileImageUrl,
+            "avatar_\(CodingKeys.authodId.rawValue)": authodId,
+            "avatar_\(CodingKeys.dateCreated.rawValue)": dateCreated,
+            "avatar_\(CodingKeys.viewCount.rawValue)": viewCount
+        ]
+        
+        return dict.compactMapValues { $0 } // drop values if nil
+    }
+    
     static func newAvatar(
         name: String,
         character: Character,

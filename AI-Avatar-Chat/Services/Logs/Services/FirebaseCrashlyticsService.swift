@@ -16,11 +16,11 @@ struct FirebaseCrashlyticsService: LogService {
         }
         
         if let email = email {
-            Crashlytics.crashlytics().setCustomValue(name, forKey: "account_email")
+            Crashlytics.crashlytics().setCustomValue(email, forKey: "account_email")
         }
     }
     
-    func addUserProperties(dict: [String : Any], isHighPriority: Bool) {
+    func addUserProperties(dict: [String: Any], isHighPriority: Bool) {
         guard isHighPriority else { return }
         
         for (key, value) in dict {

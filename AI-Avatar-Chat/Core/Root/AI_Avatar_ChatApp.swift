@@ -147,7 +147,7 @@ extension View {
             .environment(UserManager(userServices: MockUserServices(user: isSignIn ? .mock : nil)))
             .environment(AuthManager(authService: MockAuthService(authUser: isSignIn ? .mock() : nil)))
             .environment(AppState())
-            .environment(LogManager(services: []))
+            .environment(LogManager(services: [ConsoleService(printParameters: false)]))
     }
 }
 
