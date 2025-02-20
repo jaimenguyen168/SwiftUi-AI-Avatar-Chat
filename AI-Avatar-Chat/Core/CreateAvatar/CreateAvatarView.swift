@@ -13,6 +13,8 @@ struct CreateAvatarView: View {
     @Environment(AuthManager.self) private var authManager
     @Environment(AvatarManager.self) private var avatarManager
     
+    @Environment(LogManager.self) private var logManager
+    
     @Environment(\.dismiss) var dismiss
     @State private var avatarName = ""
     @State private var character: Character = .default
@@ -46,10 +48,14 @@ struct CreateAvatarView: View {
                 }
             }
             .showCustomAlert(alert: $showAlert)
+            .screenAppearAnalytics(name: "CreateAvatarView")
         }
     }
-    
-    private var backButton: some View {
+}
+
+// MARK: Views Section
+private extension CreateAvatarView {
+    var backButton: some View {
         Image(systemName: "xmark")
             .font(.headline)
             .fontWeight(.semibold)
@@ -59,7 +65,7 @@ struct CreateAvatarView: View {
             }
     }
     
-    private var nameSection: some View {
+    var nameSection: some View {
         Section {
             TextField("Player 1", text: $avatarName)
         } header: {
@@ -67,7 +73,7 @@ struct CreateAvatarView: View {
         }
     }
     
-    private var attributesSection: some View {
+    var attributesSection: some View {
         Section {
             Picker(selection: $character) {
                 ForEach(Character.allCases) { character in
@@ -101,7 +107,7 @@ struct CreateAvatarView: View {
         .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
     }
     
-    private var imageSection: some View {
+    var imageSection: some View {
         Section {
             HStack(alignment: .top) {
                 ZStack {
@@ -137,7 +143,7 @@ struct CreateAvatarView: View {
         }
     }
     
-    private var saveSection: some View {
+    var saveSection: some View {
         Section {
             AsyncCallToActionButton(
                 title: "Save",
@@ -149,34 +155,88 @@ struct CreateAvatarView: View {
         .opacity(generatedImage == nil ? 0.5 : 1)
         .disabled(generatedImage == nil)
     }
-    
-    private func onBackButtonPress() {
+}
+
+// MARK: Additional Data Section
+private extension CreateAvatarView {
+    enum Event: LoggableEvent {
+        case backButtonPressed
+        case generateImageStart
+        case generateImageSuccess(builder: AvatarDescriptionBuilder)
+        case generateImageFailed(error: Error)
+        case saveAvatarStart
+        case saveAvatarSuccess(avatar: Avatar)
+        case saveAvatarFailed(error: Error)
+        
+        var eventName: String {
+            switch self {
+            case .backButtonPressed:     "CreateAvatarView_BackButton_Pressed"
+            case .generateImageStart:    "CreateAvatarView_GenerateImage_Start"
+            case .generateImageSuccess:  "CreateAvatarView_GenerateImage_Success"
+            case .generateImageFailed:   "CreateAvatarView_GenerateImage_Failed"
+            case .saveAvatarStart:       "CreateAvatarView_SaveAvatar_Start"
+            case .saveAvatarSuccess:     "CreateAvatarView_SaveAvatar_Success"
+            case .saveAvatarFailed:      "CreateAvatarView_SaveAvatar_Failed"
+            }
+        }
+        
+        var parameters: [String: Any]? {
+            switch self {
+            case .generateImageSuccess(builder: let builder):
+                return builder.eventParameters
+            case .saveAvatarSuccess(avatar: let avatar):
+                return avatar.eventParameters
+            case .saveAvatarFailed(error: let error), .generateImageFailed(error: let error):
+                return error.eventParameters
+            default: return nil
+            }
+        }
+        
+        var logType: LogType {
+            switch self {
+            case .generateImageFailed: .severe
+            case .saveAvatarFailed: .warning
+            default: .analytic
+            }
+        }
+    }
+}
+
+// MARK: Logic Section
+private extension CreateAvatarView {
+    func onBackButtonPress() {
+        logManager.trackEvent(event: Event.backButtonPressed)
         dismiss()
     }
     
-    private func onGenerateImagePress() {
+    func onGenerateImagePress() {
         isGenerating = true
+        logManager.trackEvent(event: Event.generateImageStart)
         
         Task {
             do {
-                let prompt = AvatarDescriptionBuilder(
+                let builder = AvatarDescriptionBuilder(
                     character: character,
                     action: action,
                     location: location
-                ).description
+                )
+                let prompt = builder.description
                 
                 generatedImage = try await aiManager.generateImage(prompt: prompt)
+                logManager.trackEvent(event: Event.generateImageSuccess(builder: builder))
             } catch {
                 showAlert = AppAlert(error: error)
+                logManager.trackEvent(event: Event.generateImageFailed(error: error))
             }
             
             isGenerating = false
         }
     }
     
-    private func onSavePress() {
+    func onSavePress() {
         guard let generatedImage else { return }
         isSaving = true
+        logManager.trackEvent(event: Event.saveAvatarStart)
         
         Task {
             do {
@@ -195,10 +255,11 @@ struct CreateAvatarView: View {
                     avatar: avatar,
                     image: generatedImage
                 )
+                logManager.trackEvent(event: Event.saveAvatarSuccess(avatar: avatar))
                 
                 dismiss()
             } catch {
-                print("DEBUG: \(error.localizedDescription)")
+                logManager.trackEvent(event: Event.saveAvatarFailed(error: error))
                 showAlert = .init(error: error)
             }
             

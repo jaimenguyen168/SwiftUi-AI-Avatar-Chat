@@ -13,6 +13,8 @@ struct ChatsView: View {
     @Environment(ChatManager.self) private var chatManager
     @Environment(AuthManager.self) private var authManager
     
+    @Environment(LogManager.self) private var logManager
+    
     @State private var chats: [Chat] = []
     @State private var recentAvatars: [Avatar] = []
     @State private var option: NavigationCoreOption?
@@ -43,6 +45,7 @@ struct ChatsView: View {
             .navigationTitle("Chats")
             .navigationDestinationCoreOption(option: $option)
             .showCustomAlert(alert: $showAlert)
+            .screenAppearAnalytics(name: "ChatsView")
             .onAppear {
                 loadRecentAvatars()
             }
@@ -53,6 +56,7 @@ struct ChatsView: View {
     }
 }
 
+// MARK: Views Section
 private extension ChatsView {
     var recentsSection: some View {
         Section {
@@ -127,27 +131,81 @@ private extension ChatsView {
     }
 }
 
+// MARK: Additional Data Section
+private extension ChatsView {
+    enum Event: LoggableEvent {
+        case loadRecentAvatarsStart
+        case loadRecentAvatarsSuccess(avatarCount: Int)
+        case loadRecentAvatarsFailed(error: Error)
+        case loadChatsStart
+        case loadChatsSuccess(chatCount: Int)
+        case loadChatsFailed(error: Error)
+        case avatarPressed(avatar: Avatar?)
+        
+        var eventName: String {
+            switch self {
+            case .loadRecentAvatarsStart:       "ChatsView_LoadRecentAvatars_Start"
+            case .loadRecentAvatarsSuccess:     "ChatsView_LoadRecentAvatars_Success"
+            case .loadRecentAvatarsFailed:      "ChatsView_LoadRecentAvatars_Failed"
+            case .loadChatsStart:               "ChatsView_LoadChats_Start"
+            case .loadChatsSuccess:             "ChatsView_LoadChats_Success"
+            case .loadChatsFailed:              "ChatsView_LoadChats_Failed"
+            case .avatarPressed:                "ChatsView_AvatarPressed"
+            }
+        }
+        
+        var parameters: [String: Any]? {
+            switch self {
+            case .loadChatsFailed(error: let error), .loadRecentAvatarsFailed(error: let error):
+                return error.eventParameters
+            case .loadRecentAvatarsSuccess(avatarCount: let count):
+                return ["avatars_count": count]
+            case .loadChatsSuccess(chatCount: let count):
+                return ["chats_count": count]
+            case .avatarPressed(avatar: let avatar):
+                return avatar?.eventParameters
+            default: return nil
+            }
+        }
+        
+        var logType: LogType {
+            switch self {
+            case .loadChatsFailed, .loadRecentAvatarsFailed: .severe
+            default: .analytic
+            }
+        }
+    }
+}
+
+// MARK: Logic Section
 private extension ChatsView {
     func loadRecentAvatars() {
+        logManager.trackEvent(event: Event.loadRecentAvatarsStart)
+        
         do {
             recentAvatars = try avatarManager.getRecentAvatars()
+            logManager.trackEvent(event: Event.loadRecentAvatarsSuccess(avatarCount: recentAvatars.count))
         } catch {
-            print("DEBUG: failed to fetch recents with error \(error.localizedDescription)")
+            logManager.trackEvent(event: Event.loadRecentAvatarsFailed(error: error))
         }
     }
     
     func loadChats() async {
+        logManager.trackEvent(event: Event.loadChatsStart)
+        
         do {
             let uid = authManager.authUser?.uid ?? ""
             chats = try await chatManager
                 .fetchAllChats(userId: uid)
                 .sortedByKeyPath(keyPath: \.dateModified, ascending: false)
             
+            logManager.trackEvent(event: Event.loadChatsSuccess(chatCount: chats.count))
+            
             if chats.isEmpty {
                 errorDisplayMessage = "No chats yet"
             }
         } catch {
-            print("DEBUG: failed to fetch chats with error \(error.localizedDescription)")
+            logManager.trackEvent(event: Event.loadChatsFailed(error: error))
             errorDisplayMessage = "Loading Error"
             showAlert = AppAlert(error: error)
         }
@@ -156,6 +214,7 @@ private extension ChatsView {
     }
     
     func onAvatarPress(_ avatar: Avatar) {
+        logManager.trackEvent(event: Event.avatarPressed(avatar: avatar))
         option = .chat(avatar: avatar, chat: nil)
     }
 }

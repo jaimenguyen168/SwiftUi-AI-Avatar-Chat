@@ -51,7 +51,7 @@ enum Location: String, CaseIterable, Hashable, Identifiable, Codable {
     var id: String { self.rawValue }
 }
 
-struct AvatarDescriptionBuilder {
+struct AvatarDescriptionBuilder: Codable {
     let character: Character
     let action: Action
     let location: Location
@@ -70,5 +70,18 @@ struct AvatarDescriptionBuilder {
     
     var description: String {
         "\(character.startsWithVowel ? "An" : "A") \(character.rawValue) is \(action.rawValue) in the \(location.rawValue)"
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case character, action, location
+    }
+    
+    var eventParameters: [String: Any] {
+        [
+            "character_\(CodingKeys.character.rawValue)": character,
+            "character_\(CodingKeys.action.rawValue)": action,
+            "character_\(CodingKeys.location.rawValue)": location,
+            "character_description": description,
+        ]
     }
 }

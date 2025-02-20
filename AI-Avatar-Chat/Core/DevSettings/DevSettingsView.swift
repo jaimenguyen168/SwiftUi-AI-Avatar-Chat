@@ -29,6 +29,7 @@ struct DevSettingsView: View {
                     dismissButton
                 }
             }
+            .screenAppearAnalytics(name: "DevSettingsView")
         }
     }
 }
