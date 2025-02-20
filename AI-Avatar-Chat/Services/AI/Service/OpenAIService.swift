@@ -84,6 +84,20 @@ struct AIChatModel: Codable {
         }
     }
     
+    enum CodingKeys: String, CodingKey {
+        case role, message
+    }
+    
+    var eventParameters: [String: Any] {
+        let dict: [String: Any?] = [
+            "aichat_\(CodingKeys.role.rawValue)": role,
+            "aichat_\(CodingKeys.message.rawValue)": message,
+        ]
+        
+        return dict.compactMapValues { $0 } // drop values if nil
+    }
+
+    
     func toOpenAIModel() -> ChatQuery.ChatCompletionMessageParam? {
         switch role {
         case .system: .system(.init(content: message))

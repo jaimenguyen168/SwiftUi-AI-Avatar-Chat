@@ -50,6 +50,20 @@ struct ChatMessage: Identifiable, Codable, StringIdentifiable {
         case dateCreated = "date_created"
     }
     
+    var eventParameters: [String: Any] {
+        var dict: [String: Any?] = [
+            "message_\(CodingKeys.id.rawValue)": id,
+            "message_\(CodingKeys.chatId.rawValue)": chatId,
+            "message_\(CodingKeys.authorId.rawValue)": authorId,
+            "message_\(CodingKeys.seenByIds.rawValue)": seenByIds?.sorted().joined(separator: ", "),
+            "message_\(CodingKeys.dateCreated.rawValue)": dateCreated,
+        ]
+        
+        dict.merge(content?.eventParameters)
+        
+        return dict.compactMapValues { $0 } // drop values if nil
+    }
+    
     static func newUserMessage(
         chatId: String,
         userId: String,
