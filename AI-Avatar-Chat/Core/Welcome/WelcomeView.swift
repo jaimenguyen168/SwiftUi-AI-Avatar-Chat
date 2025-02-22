@@ -10,6 +10,9 @@ import SwiftUI
 struct WelcomeView: View {
     
     @Environment(AppState.self) private var root
+    
+    @Environment(LogManager.self) private var logManager
+    
     @State var imageUrl = Constants.randomImageUrl
     @State private var showSignInAccountView: Bool = false
     
@@ -28,6 +31,7 @@ struct WelcomeView: View {
                 termsAndPolicyLink
             }
         }
+        .screenAppearAnalytics(name: "WelcomeView")
         .sheet(isPresented: $showSignInAccountView) {
             CreateAccountView(
                 title: "Sign In",
@@ -41,6 +45,7 @@ struct WelcomeView: View {
     }
 }
 
+// MARK: Views Section
 private extension WelcomeView {
     var titleSection: some View {
         VStack(spacing: 8) {
@@ -91,14 +96,46 @@ private extension WelcomeView {
     }
 }
 
+// MARK: Additional Data Section
+private extension WelcomeView {
+    enum Event: LoggableEvent {
+        case signInPressed
+        case didSignIn(Bool)
+        
+        var eventName: String {
+            switch self {
+            case .signInPressed:    "WelcomeView_SignIn_Pressed"
+            case .didSignIn:        "WelcomeView_DidSignIn"
+            }
+        }
+        
+        var parameters: [String: Any]? {
+            switch self {
+            case .didSignIn(let isNewUser):
+                return ["is_new_user": isNewUser]
+            default: return nil
+            }
+        }
+        
+        var logType: LogType {
+            switch self {
+            default: .analytic
+            }
+        }
+    }
+}
+
+// MARK: Logic Section
 private extension WelcomeView {
     func onSignInTapped() {
         showSignInAccountView = true
+        logManager.trackEvent(event: Event.signInPressed)
     }
     
     func handleDidSignIn(isNewUser: Bool) {
+        logManager.trackEvent(event: Event.didSignIn(isNewUser))
         if isNewUser {
-            
+            // Do nothing
         } else {
             root.updateViewState(showTabBarView: true)
         }

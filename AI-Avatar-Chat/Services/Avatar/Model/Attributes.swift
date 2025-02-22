@@ -81,7 +81,7 @@ struct AvatarDescriptionBuilder: Codable {
             "character_\(CodingKeys.character.rawValue)": character,
             "character_\(CodingKeys.action.rawValue)": action,
             "character_\(CodingKeys.location.rawValue)": location,
-            "character_description": description,
+            "character_description": description
         ]
     }
 }

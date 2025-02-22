@@ -11,6 +11,8 @@ struct ExploreView: View {
     
     @Environment(AvatarManager.self) private var avatarManager
     
+    @Environment(LogManager.self) private var logManager
+    
     @State private var categories: [Character] = Character.allCases
     
     @State private var featuredAvatars: [Avatar] = []
@@ -68,6 +70,7 @@ struct ExploreView: View {
                 DevSettingsView()
             })
             .navigationDestinationCoreOption(option: $option)
+            .screenAppearAnalytics(name: "ExploreView")
             .task {
                 await loadFeaturedAvatars()
             }
@@ -196,15 +199,71 @@ private extension ExploreView {
     }
 }
 
+// MARK: Additional Data Section
+private extension ExploreView {
+    enum Event: LoggableEvent {
+        case loadFeatureAvatarsStart
+        case loadFeatureAvatarsSuccess(avatarCount: Int)
+        case loadFeatureAvatarsFailed(error: Error)
+        case loadPopularAvatarsStart
+        case loadPopularAvatarsSuccess(avatarCount: Int)
+        case loadPopularAvatarsFailed(error: Error)
+        case avatarPressed(avatar: Avatar)
+        case categoryPressed(category: Character)
+        case devSettingsPressed
+        case tryAgainPressed
+        
+        var eventName: String {
+            switch self {
+            case .loadFeatureAvatarsStart:      "ExploreView_LoadFeatureAvatar_Start"
+            case .loadFeatureAvatarsSuccess:    "ExploreView_LoadFeatureAvatar_Success"
+            case .loadFeatureAvatarsFailed:     "ExploreView_LoadFeatureAvatar_Failed"
+            case .loadPopularAvatarsStart:      "ExploreView_LoadPopularAvatar_Start"
+            case .loadPopularAvatarsSuccess:    "ExploreView_LoadPopularAvatar_Success"
+            case .loadPopularAvatarsFailed:     "ExploreView_LoadPopularAvatar_Failed"
+            case .avatarPressed:                "ExploreView_Avatar_Pressed"
+            case .categoryPressed:              "ExploreView_Category_Pressed"
+            case .devSettingsPressed:           "ExploreView_DevSettings_Pressed"
+            case .tryAgainPressed:              "ExploreView_TryAgain_Pressed"
+            }
+        }
+        
+        var parameters: [String: Any]? {
+            switch self {
+            case .loadFeatureAvatarsSuccess(avatarCount: let count),
+                    .loadPopularAvatarsSuccess(avatarCount: let count):
+                return ["avatars_count": count]
+            case .loadPopularAvatarsFailed(error: let error),
+                    .loadFeatureAvatarsFailed(error: let error):
+                return error.eventParameters
+            case .avatarPressed(avatar: let avatar):
+                return avatar.eventParameters
+            case .categoryPressed(category: let category):
+                return ["category": category.rawValue]
+            default: return nil
+            }
+        }
+        
+        var logType: LogType {
+            switch self {
+            case .loadFeatureAvatarsFailed, .loadPopularAvatarsFailed: .severe
+            default: .analytic
+            }
+        }
+    }
+}
+
 // MARK: Logic Section
 private extension ExploreView {
     func loadFeaturedAvatars() async {
         guard featuredAvatars.isEmpty else { return }
+        logManager.trackEvent(event: Event.loadFeatureAvatarsStart)
         
         do {
             featuredAvatars = try await avatarManager.getFeaturedAvatars()
+            logManager.trackEvent(event: Event.loadFeatureAvatarsSuccess(avatarCount: featuredAvatars.count))
         } catch {
-            print("DEBUG: Loading featured avatars failed with error \(error.localizedDescription)")
+            logManager.trackEvent(event: Event.loadFeatureAvatarsFailed(error: error))
         }
         
         isFeatureLoading = false
@@ -212,11 +271,13 @@ private extension ExploreView {
     
     func loadPopularAvatars() async {
         guard popularAvatars.isEmpty else { return }
+        logManager.trackEvent(event: Event.loadPopularAvatarsStart)
         
         do {
             popularAvatars = try await avatarManager.getPopularAvatars()
+            logManager.trackEvent(event: Event.loadPopularAvatarsSuccess(avatarCount: popularAvatars.count))
         } catch {
-            print("DEBUG: Loading popular avatars failed with error \(error.localizedDescription)")
+            logManager.trackEvent(event: Event.loadPopularAvatarsFailed(error: error))
         }
         
         isPopularLoading = false
@@ -224,6 +285,7 @@ private extension ExploreView {
     
     func onAvatarPress(_ avatar: Avatar) {
         option = .chat(avatar: avatar, chat: nil)
+        logManager.trackEvent(event: Event.avatarPressed(avatar: avatar))
     }
     
     func onCategoryPress(
@@ -235,11 +297,13 @@ private extension ExploreView {
             category: category,
             imageName: imageName
         )
+        logManager.trackEvent(event: Event.categoryPressed(category: category))
     }
     
     func onRetryPress() {
         isFeatureLoading = true
         isPopularLoading = true
+        logManager.trackEvent(event: Event.tryAgainPressed)
         
         Task {
             await loadFeaturedAvatars()
@@ -250,15 +314,15 @@ private extension ExploreView {
     }
     
     func onDevSettingsPress() {
+        logManager.trackEvent(event: Event.devSettingsPressed)
         showDevSettings = true
     }
 }
 
 #Preview("Has Data") {
     ExploreView()
-        .environment(AvatarManager(avatarService: MockAvatarService()
-        )
-    )
+        .environment(AvatarManager(avatarService: MockAvatarService()))
+        .previewAllEnvironments()
 }
 
 #Preview("No Data") {
@@ -268,14 +332,14 @@ private extension ExploreView {
                 avatars: [],
                 delay: 1.0
             )
-        )
-    )
+        ))
+        .previewAllEnvironments()
 }
 
 #Preview("Slow Loading") {
     ExploreView()
         .environment(AvatarManager(
             avatarService: MockAvatarService(delay: 5.0)
-        )
-    )
+        ))
+        .previewAllEnvironments()
 }

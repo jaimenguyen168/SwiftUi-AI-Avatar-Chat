@@ -12,6 +12,8 @@ struct ProfileView: View {
     @Environment(UserManager.self) private var userManager
     @Environment(AvatarManager.self) private var avatarManager
     
+    @Environment(LogManager.self) private var logManager
+    
     @State private var showSettingsView: Bool = false
     @State private var showCreateAvatarView: Bool = false
     @State private var currentUser: AppUser?
@@ -51,6 +53,7 @@ struct ProfileView: View {
             await loadData()
         }
         .showCustomAlert(alert: $showAlert)
+        .screenAppearAnalytics(name: "ProfileView")
     }
 }
 
@@ -125,16 +128,67 @@ private extension ProfileView {
     }
 }
 
+// MARK: Additional Data Section
+private extension ProfileView {
+    enum Event: LoggableEvent {
+        case loadAvatarsStart
+        case loadAvatarsSuccess(avatarCount: Int)
+        case loadAvatarsFailed(error: Error)
+        case newAvatarPressed
+        case settingsPressed
+        case avatatPressed(avatar: Avatar)
+        case deleteAvatarStart(avatar: Avatar)
+        case deleteAvatarSuccess(avatar: Avatar)
+        case deleteAvatarFailed(error: Error)
+        
+        var eventName: String {
+            switch self {
+            case .loadAvatarsStart:     "ProfileView_LoadAvatars_Start"
+            case .loadAvatarsSuccess:   "ProfileView_LoadAvatars_Success"
+            case .loadAvatarsFailed:    "ProfileView_LoadAvatars_Failed"
+            case .newAvatarPressed:     "ProfileView_NewAvatar_Pressed"
+            case .settingsPressed:      "ProfileView_Settings_Pressed"
+            case .avatatPressed:        "ProfileView_Avatar_Pressed"
+            case .deleteAvatarStart:    "ProfileView_DeleteAvatar_Start"
+            case .deleteAvatarSuccess:  "ProfileView_DeleteAvatar_Success"
+            case .deleteAvatarFailed:   "ProfileView_DeleteAvatar_Failed"
+            }
+        }
+        
+        var parameters: [String: Any]? {
+            switch self {
+            case .loadAvatarsSuccess(let avatarCount):
+                return ["avatar_count": avatarCount]
+            case .avatatPressed(let avatar), .deleteAvatarStart(let avatar), .deleteAvatarSuccess(let avatar):
+                return avatar.eventParameters
+            case .loadAvatarsFailed(let error), .deleteAvatarFailed(let error):
+                return error.eventParameters
+            default: return nil
+            }
+        }
+        
+        var logType: LogType {
+            switch self {
+            case .loadAvatarsFailed, .deleteAvatarFailed: .severe
+            default: .analytic
+            }
+        }
+    }
+}
+
 // MARK: Logic Section
 private extension ProfileView {
     func loadData() async {
         self.currentUser = userManager.currentUser
+        logManager.trackEvent(event: Event.loadAvatarsStart)
         
         do {
             let uid = currentUser?.userId ?? ""
             myAvatars = try await avatarManager.getAvatarsForAuthor(authorId: uid)
+            
+            logManager.trackEvent(event: Event.loadAvatarsSuccess(avatarCount: myAvatars.count))
         } catch {
-            print("DEBUG: Failed to load avatars for profile with error \(error.localizedDescription)")
+            logManager.trackEvent(event: Event.loadAvatarsFailed(error: error))
         }
         
         isLoading = false
@@ -142,31 +196,37 @@ private extension ProfileView {
     
     func onNewAvatarButtonTap() {
         showCreateAvatarView = true
+        logManager.trackEvent(event: Event.newAvatarPressed)
     }
     
     func onSettingsButtonTap() {
         showSettingsView = true
+        logManager.trackEvent(event: Event.settingsPressed)
     }
     
     func onDeleteAvatar(indexSet: IndexSet) {
         guard let index = indexSet.first else { return }
         let avatarToDelete = myAvatars[index]
+        logManager.trackEvent(event: Event.deleteAvatarStart(avatar: avatarToDelete))
         
         Task {
             do {
                 try await avatarManager.removeAuthorIdFromAvatar(avatarToDelete.avatarId)
                 myAvatars.remove(at: index)
+                logManager.trackEvent(event: Event.deleteAvatarSuccess(avatar: avatarToDelete))
             } catch {
                 showAlert = AppAlert(
                     title: "Unable to delete",
                     subtitle: "Please try again later"
                 )
+                logManager.trackEvent(event: Event.deleteAvatarFailed(error: error))
             }
         }
     }
     
     func onAvatarPress(_ avatar: Avatar) {
         option = .chat(avatar: avatar, chat: nil)
+        logManager.trackEvent(event: Event.avatatPressed(avatar: avatar))
     }
 }
 

@@ -16,6 +16,8 @@ struct SettingsView: View {
     @Environment(AvatarManager.self) private var avatarManager
     @Environment(AppState.self) private var appState
     
+    @Environment(LogManager.self) private var logManager
+    
     @State private var isPremium: Bool = false
     @State private var isAnonymousUser: Bool = true
     @State private var showCreateAccountView: Bool = false
@@ -46,6 +48,7 @@ struct SettingsView: View {
                 setAnonymousStatus()
             }
             .showCustomAlert(alert: $showAlert)
+            .screenAppearAnalytics(name: "SettingsView")
         }
     }
 }
@@ -160,6 +163,48 @@ private extension SettingsView {
     }
 }
 
+// MARK: Additional Data Section
+private extension SettingsView {
+    enum Event: LoggableEvent {
+        case signOutStart
+        case signOutSuccess
+        case signOutFailed(Error)
+        case createAccountPressed
+        case deleteAccountStart
+        case deleteAccountSuccess(String)
+        case deleteAccountFailed(Error)
+        
+        var eventName: String {
+            switch self {
+            case .signOutStart:         "SettingsView_SignOut_Start"
+            case .signOutSuccess:       "SettingsView_SignOut_Success"
+            case .signOutFailed:        "SettingsView_SignOut_Failed"
+            case .createAccountPressed: "SettingsView_CreateAccount_Pressed"
+            case .deleteAccountStart:   "SettingsView_DeleteAccount_Start"
+            case .deleteAccountSuccess: "SettingsView_DeleteAccount_Success"
+            case .deleteAccountFailed:  "SettingsView_DeleteAccount_Failed"
+            }
+        }
+        
+        var parameters: [String: Any]? {
+            switch self {
+            case .deleteAccountSuccess(let uid):
+                return ["uid": uid]
+            case .signOutFailed(let error), .deleteAccountFailed(let error):
+                return error.eventParameters
+            default: return nil
+            }
+        }
+        
+        var logType: LogType {
+            switch self {
+            case .signOutFailed, .deleteAccountFailed: .severe
+            default: .analytic
+            }
+        }
+    }
+}
+
 // MARK: Logic Section
 private extension SettingsView {
     func setAnonymousStatus() {
@@ -167,19 +212,26 @@ private extension SettingsView {
     }
     
     func onSignOutTapped() {
+        logManager.trackEvent(event: Event.signOutStart)
+        
         Task {
             do {
                 try authManager.signOut()
                 userManager.signOut()
+                
+                logManager.trackEvent(event: Event.signOutSuccess)
+                
                 await dismissView()
             } catch {
                 showAlert = AppAlert(error: error)
+                logManager.trackEvent(event: Event.signOutFailed(error))
             }
         }
     }
     
     func onCreateAccountTapped() {
         showCreateAccountView = true
+        logManager.trackEvent(event: Event.createAccountPressed)
     }
     
     func dismissView() async {
@@ -203,6 +255,8 @@ private extension SettingsView {
     }
     
     func onDeleteAccountConfirmed() {
+        logManager.trackEvent(event: Event.deleteAccountStart)
+        
         Task {
             do {
                 let uid = try authManager.getAuthId()
@@ -213,18 +267,21 @@ private extension SettingsView {
                 async let removeRecentAvatars: () = avatarManager.removeAllRecentAvatars()
                 async let deleteChats: () = chatManager.deleteAllChatsForUser(userId: uid)
                 
-                let (_, _, _, _, _) = await
+                let (_, _, _, _, _, _) = await
                 (
                     try deleteAuth,
                     try deleteUser,
                     try removeUser,
                     try removeRecentAvatars,
-                    try deleteChats
+                    try deleteChats,
+                    logManager.deleteUserProfile()
                 )
+                logManager.trackEvent(event: Event.deleteAccountSuccess(uid))
                 
                 await dismissView()
             } catch {
                 showAlert = AppAlert(error: error)
+                logManager.trackEvent(event: Event.deleteAccountFailed(error))
             }
         }
     }
