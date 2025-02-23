@@ -171,18 +171,20 @@ private extension SettingsView {
         case signOutFailed(Error)
         case createAccountPressed
         case deleteAccountStart
+        case deleteAccountStartConfimred
         case deleteAccountSuccess(String)
         case deleteAccountFailed(Error)
         
         var eventName: String {
             switch self {
-            case .signOutStart:         "SettingsView_SignOut_Start"
-            case .signOutSuccess:       "SettingsView_SignOut_Success"
-            case .signOutFailed:        "SettingsView_SignOut_Failed"
-            case .createAccountPressed: "SettingsView_CreateAccount_Pressed"
-            case .deleteAccountStart:   "SettingsView_DeleteAccount_Start"
-            case .deleteAccountSuccess: "SettingsView_DeleteAccount_Success"
-            case .deleteAccountFailed:  "SettingsView_DeleteAccount_Failed"
+            case .signOutStart:                 "SettingsView_SignOut_Start"
+            case .signOutSuccess:               "SettingsView_SignOut_Success"
+            case .signOutFailed:                "SettingsView_SignOut_Failed"
+            case .createAccountPressed:         "SettingsView_CreateAccount_Pressed"
+            case .deleteAccountStart:           "SettingsView_DeleteAccount_Start"
+            case .deleteAccountStartConfimred:  "SettingsView_DeleteAccount_StartConfimred"
+            case .deleteAccountSuccess:         "SettingsView_DeleteAccount_Success"
+            case .deleteAccountFailed:          "SettingsView_DeleteAccount_Failed"
             }
         }
         
@@ -241,6 +243,8 @@ private extension SettingsView {
     }
     
     func onDeleteAccountTapped() {
+        logManager.trackEvent(event: Event.deleteAccountStart)
+        
         showAlert = AppAlert(
             title: "Delete Account",
             subtitle: "This action is permanent and cannot be undone. Are you sure you want to delete your account?",
@@ -255,27 +259,34 @@ private extension SettingsView {
     }
     
     func onDeleteAccountConfirmed() {
-        logManager.trackEvent(event: Event.deleteAccountStart)
+        logManager.trackEvent(event: Event.deleteAccountStartConfimred)
         
         Task {
             do {
                 let uid = try authManager.getAuthId()
                 
-                async let deleteAuth: () = authManager.deleteAccount()
-                async let deleteUser: () = userManager.deleteCurrentUser()
-                async let removeUser: () = avatarManager.removeAuthorIdFromAllAvatars(authorId: uid)
-                async let removeRecentAvatars: () = avatarManager.removeAllRecentAvatars()
-                async let deleteChats: () = chatManager.deleteAllChatsForUser(userId: uid)
+//                async let deleteAuth: () = authManager.deleteAccount()
+//                async let deleteUser: () = userManager.deleteCurrentUser()
+//                async let removeUser: () = avatarManager.removeAuthorIdFromAllAvatars(authorId: uid)
+//                async let removeRecentAvatars: () = avatarManager.removeAllRecentAvatars()
+//                async let deleteChats: () = chatManager.deleteAllChatsForUser(userId: uid)
+//                
+//                let (_, _, _, _, _, _) = await
+//                (
+//                    try deleteAuth,
+//                    try deleteUser,
+//                    try removeUser,
+//                    try removeRecentAvatars,
+//                    try deleteChats,
+//                    logManager.deleteUserProfile()
+//                )
+                try await authManager.deleteAccount()
+                try await userManager.deleteCurrentUser()
+                try await avatarManager.removeAuthorIdFromAllAvatars(authorId: uid)
+                try await avatarManager.removeAllRecentAvatars()
+                try await chatManager.deleteAllChatsForUser(userId: uid)
                 
-                let (_, _, _, _, _, _) = await
-                (
-                    try deleteAuth,
-                    try deleteUser,
-                    try removeUser,
-                    try removeRecentAvatars,
-                    try deleteChats,
-                    logManager.deleteUserProfile()
-                )
+                logManager.deleteUserProfile()
                 logManager.trackEvent(event: Event.deleteAccountSuccess(uid))
                 
                 await dismissView()

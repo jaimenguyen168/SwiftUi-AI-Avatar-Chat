@@ -269,8 +269,8 @@ private extension ChatView {
         
         var logType: LogType {
             switch self {
-            case .loadAvatarFailed, .loadMessagedFailed, .messageSeenFailed, .reportChatFailed, .deleteChatFailed: .severe
-            case .loadChatFailed, .sendMessageFailed: .warning
+            case .loadAvatarFailed, .messageSeenFailed, .reportChatFailed, .deleteChatFailed: .severe
+            case .loadChatFailed, .sendMessageFailed, .loadMessagedFailed: .warning
             default: .analytic
             }
         }

@@ -35,7 +35,7 @@ struct FirebaseAnalyticsService: LogService {
         
         for (key, value) in dict {
             if let stringValue = String.convertToString(value) {
-                let key = key.clean(maxCharacters: 40)
+                let key = key.clean(maxCharacters: 24)
                 let stringValue = stringValue.clean(maxCharacters: 100)
                 
                 Analytics.setUserProperty(stringValue, forName: key)

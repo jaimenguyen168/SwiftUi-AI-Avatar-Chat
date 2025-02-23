@@ -28,6 +28,10 @@ class AuthManager {
     private func addAuthListeners() {
         logManager?.trackEvent(event: Event.authListenerStart)
         
+        if let authListener {
+            authService.removeAuthenticatedUserListener(listener: authListener)
+        }
+        
         Task {
             for await value in authService.addAuthenticatedUserListener(onListenerAttached: { listener in
                 self.authListener = listener
@@ -56,7 +60,11 @@ class AuthManager {
     }
     
     func signInWithApple() async throws -> (user: UserAuthInfo, isNewUser: Bool) {
-        try await authService.signInWithApple()
+        defer {
+            addAuthListeners()
+        }
+        
+        return try await authService.signInWithApple()
     }
     
     func signOut() throws {

@@ -27,6 +27,10 @@ struct FirebaseAuthService: AuthService {
         }
     }
     
+    func removeAuthenticatedUserListener(listener: any NSObjectProtocol) {
+        Auth.auth().removeStateDidChangeListener(listener)
+    }
+    
     func getAuthenticatedUser() -> UserAuthInfo? {
         if let user = Auth.auth().currentUser {
             return UserAuthInfo(user: user)
@@ -84,17 +88,53 @@ struct FirebaseAuthService: AuthService {
             throw AuthError.userNotFound
         }
         
-        try await user.delete()
+        do {
+            try await user.delete()
+        } catch let error as NSError {
+            let authError = AuthErrorCode(rawValue: error.code)
+            switch authError {
+            case .requiresRecentLogin:
+                // try to re-auth
+                try await reauthenticateUser(error: error)
+                
+                // if successful
+                return try await user.delete()
+            default:
+                throw error
+            }
+        }
+    }
+    
+    private func reauthenticateUser(error: Error) async throws {
+        guard let user = Auth.auth().currentUser, let providerID = user.providerData.first?.providerID else {
+            throw AuthError.userNotFound
+        }
+        
+        let uid = user.uid
+        
+        switch providerID {
+        case "apple.com":
+            let result = try await signInWithApple()
+            
+            guard user.uid == result.user.uid else {
+                throw AuthError.reauthAccountChanged
+            }
+        default:
+            throw error
+        }
     }
 }
 
 enum AuthError: LocalizedError {
     case userNotFound
+    case reauthAccountChanged
     
     var localizedDescription: String {
         switch self {
         case .userNotFound:
             return "Current Authenticated User not found"
+        case .reauthAccountChanged:
+            return "Reauthentication required. Please sign in again with your current credentials."
         }
     }
 }
