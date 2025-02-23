@@ -120,7 +120,7 @@ private extension ChatsView {
                         }
                     )
                 }
-                .background(.white)
+                .background(Color(.systemBackground))
                 .customCornerRadius(12)
                 .formatListRow()
                 .padding(.horizontal)
