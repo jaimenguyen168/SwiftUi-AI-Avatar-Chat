@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftfulUtilities
 
 struct AppView: View {
     
@@ -29,6 +30,10 @@ struct AppView: View {
         .task {
             await checkUserAuthentication()
         }
+        .task {
+            try? await Task.sleep(for: .seconds(2))
+            await showATTPromptIfNeeded()
+        }
         .onChange(of: appState.showTabBar) { _, showTabBar in
             if !showTabBar {
                 Task {
@@ -47,14 +52,16 @@ private extension AppView {
         case anonAuthStart
         case anonAuthSuccess
         case anonAuthFailed(error: Error)
+        case attStatus(dict: [String: Any])
         
         var eventName: String {
             switch self {
-            case .existingAuthStart: "AppView_ExistingAuth_Start"
-            case .existingAuthFailed: "AppView_ExistingAuth_Failed"
-            case .anonAuthStart: "AppView_AnonAuth_Start"
-            case .anonAuthSuccess: "AppView_AnonAuth_Success"
-            case .anonAuthFailed: "AppView_AnonAuth_Failed"
+            case .existingAuthStart:    "AppView_ExistingAuth_Start"
+            case .existingAuthFailed:   "AppView_ExistingAuth_Failed"
+            case .anonAuthStart:        "AppView_AnonAuth_Start"
+            case .anonAuthSuccess:      "AppView_AnonAuth_Success"
+            case .anonAuthFailed:       "AppView_AnonAuth_Failed"
+            case .attStatus:            "AppView_ATT_Status"
             }
         }
         
@@ -62,6 +69,8 @@ private extension AppView {
             switch self {
             case .existingAuthFailed(error: let error), .anonAuthFailed(error: let error):
                 return error.eventParameters
+            case .attStatus(dict: let dict):
+                return dict
             default: return nil
             }
         }
@@ -102,6 +111,13 @@ private extension AppView {
                 await checkUserAuthentication()
             }
         }
+    }
+    
+    func showATTPromptIfNeeded() async {
+        #if !DEBUG
+        let status = await AppTrackingTransparencyHelper.requestTrackingAuthorization()
+        logManager.trackEvent(event: Event.attStatus(dict: status.eventParameters))
+        #endif
     }
 }
 
