@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftfulUtilities
 
 struct SettingsView: View {
     
@@ -23,6 +24,7 @@ struct SettingsView: View {
     @State private var showCreateAccountView: Bool = false
     
     @State private var showAlert: AppAlert?
+    @State private var showRatingsModal = false
     
     var body: some View {
         NavigationStack {
@@ -49,12 +51,30 @@ struct SettingsView: View {
             }
             .showCustomAlert(alert: $showAlert)
             .screenAppearAnalytics(name: "SettingsView")
+            .showModal(showModal: $showRatingsModal) {
+                ratingModal
+            }
         }
     }
 }
 
 // MARK: Views Section
 private extension SettingsView {
+    var ratingModal: some View {
+        CustomModalView(
+            title: "Are you enjoying AI Chat?",
+            subtitle: "We'd love to hear your feedback!",
+            primaryButtonText: "Yes",
+            primaryButtonAction: {
+                onEnjoyingAppYesPressed()
+            },
+            secondaryButtonText: "No",
+            secondaryButtonAction: {
+                onEnjoyingAppNoPressed()
+            }
+        )
+    }
+    
     var accountSection: some View {
         Section {
             if isAnonymousUser {
@@ -110,6 +130,14 @@ private extension SettingsView {
     
     var applicationSection: some View {
         Section {
+            Text("Rate Us")
+                .foregroundStyle(.blue)
+                .rowFormatting()
+                .customButton(.highlight(cornerRadius: 12)) {
+                    rateUsTapped()
+                }
+                .clearListRowBackground()
+            
             HStack(spacing: 8) {
                 Text("Version")
                 
@@ -136,7 +164,7 @@ private extension SettingsView {
                 .foregroundStyle(.blue)
                 .rowFormatting()
                 .customButton(.highlight(cornerRadius: 12)) {
-                    
+                    onContactUsPress()
                 }
                 .clearListRowBackground()
         } header: {
@@ -174,6 +202,10 @@ private extension SettingsView {
         case deleteAccountStartConfimred
         case deleteAccountSuccess(String)
         case deleteAccountFailed(Error)
+        case contactUsPressed
+        case rateUsPressed
+        case ratingsYesPressed
+        case ratingsNoPressed
         
         var eventName: String {
             switch self {
@@ -185,6 +217,10 @@ private extension SettingsView {
             case .deleteAccountStartConfimred:  "SettingsView_DeleteAccount_StartConfimred"
             case .deleteAccountSuccess:         "SettingsView_DeleteAccount_Success"
             case .deleteAccountFailed:          "SettingsView_DeleteAccount_Failed"
+            case .contactUsPressed:             "SettingsView_ContactUs_Pressed"
+            case .rateUsPressed:                "SettingsView_RateUs_Pressed"
+            case .ratingsYesPressed:            "SettingsView_Ratings_Yes_Pressed"
+            case .ratingsNoPressed:            "SettingsView_Ratings_No_Pressed"
             }
         }
         
@@ -234,6 +270,34 @@ private extension SettingsView {
     func onCreateAccountTapped() {
         showCreateAccountView = true
         logManager.trackEvent(event: Event.createAccountPressed)
+    }
+    
+    func rateUsTapped() {
+        logManager.trackEvent(event: Event.rateUsPressed)
+        showRatingsModal = true
+    }
+    
+    func onEnjoyingAppYesPressed() {
+        logManager.trackEvent(event: Event.ratingsYesPressed)
+        showRatingsModal = false
+        
+        AppStoreRatingsHelper.requestRatingsReview()
+    }
+    
+    func onEnjoyingAppNoPressed() {
+        logManager.trackEvent(event: Event.ratingsNoPressed)
+        showRatingsModal = false
+    }
+    
+    func onContactUsPress() {
+        logManager.trackEvent(event: Event.contactUsPressed)
+        
+        let email = "nguyenphuocdat168@gmail.com"
+        let emailString = "mailto: \(email)"
+        
+        guard let url = URL(string: emailString), UIApplication.shared.canOpenURL(url) else { return }
+        
+        UIApplication.shared.open(url)
     }
     
     func dismissView() async {
