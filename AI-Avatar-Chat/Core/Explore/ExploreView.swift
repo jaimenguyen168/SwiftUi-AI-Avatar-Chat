@@ -94,6 +94,9 @@ struct ExploreView: View {
             .onFirstAppear {
                 schedulePushNotifications()
             }
+            .onOpenURL { url in
+                handleDeepLink(url)
+            }
         }
     }
 }
@@ -258,6 +261,10 @@ private extension ExploreView {
         case pushNotificationsPressed
         case enablePushNotificationsPressed(isAuthorized: Bool)
         case cancelPushNotificationsPressed
+        case deeplinkStart
+        case deepLinkNoQueryItems
+        case deepLinkCategory(category: Character)
+        case deepLinkUnknown
         
         var eventName: String {
             switch self {
@@ -274,6 +281,11 @@ private extension ExploreView {
             case .pushNotificationsPressed:     "ExploreView_PushNotifications_Pressed"
             case .enablePushNotificationsPressed: "ExploreView_EnablePushNotifications_Pressed"
             case .cancelPushNotificationsPressed: "ExploreView_CancelPushNotifications_Pressed"
+            case .deeplinkStart:    "ExploreView_DeepLink_Start"
+            case .deepLinkNoQueryItems: "ExploreView_DeepLink_NoQueryItems"
+            case .deepLinkCategory: "ExploreView_DeepLink_Category"
+            case .deepLinkUnknown: "ExploreView_DeepLink_Unknown"
+                
             }
         }
         
@@ -287,7 +299,7 @@ private extension ExploreView {
                 return error.eventParameters
             case .avatarPressed(avatar: let avatar):
                 return avatar.eventParameters
-            case .categoryPressed(category: let category):
+            case .categoryPressed(category: let category), .deepLinkCategory(category: let category):
                 return ["category": category.rawValue]
             case .enablePushNotificationsPressed(isAuthorized: let isAuthorized):
                 return ["is_authorized": isAuthorized]
@@ -297,7 +309,7 @@ private extension ExploreView {
         
         var logType: LogType {
             switch self {
-            case .loadFeatureAvatarsFailed, .loadPopularAvatarsFailed: .severe
+            case .loadFeatureAvatarsFailed, .loadPopularAvatarsFailed, .deepLinkUnknown: .severe
             default: .analytic
             }
         }
@@ -396,6 +408,37 @@ private extension ExploreView {
     
     func schedulePushNotifications() {
         pushNotificationsManager.schedulePushNotificationForNextWeek()
+    }
+    
+    func handleDeepLink(_ url: URL) {
+        logManager.trackEvent(event: Event.deeplinkStart)
+        guard
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            let queryItems = components.queryItems
+        else {
+            logManager.trackEvent(event: Event.deepLinkNoQueryItems)
+            return
+        }
+        
+        for queryItem in queryItems {
+            if queryItem.name == "category",
+               let value = queryItem.value,
+               let category = Character(rawValue: value) {
+                
+                let imageName = popularAvatars.first(where: { $0.character == category })?.profileImageUrl ?? Constants.randomImageUrl
+                
+                option = .category(
+                    category: category,
+                    imageName: imageName
+                )
+                
+                logManager.trackEvent(event: Event.deepLinkCategory(category: category))
+                
+                return
+            }
+        }
+        
+        logManager.trackEvent(event: Event.deepLinkUnknown)
     }
 }
 
