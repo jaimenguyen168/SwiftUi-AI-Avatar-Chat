@@ -16,6 +16,7 @@ struct AIAvatarChatApp: App {
     var body: some Scene {
         WindowGroup {
             AppView()
+                .environment(delegate.dependencies.pushNotificationsManager)
                 .environment(delegate.dependencies.chatManager)
                 .environment(delegate.dependencies.aiManager)
                 .environment(delegate.dependencies.avatarManager)
@@ -86,6 +87,7 @@ struct Dependency {
     let chatManager: ChatManager
     
     let logManager: LogManager
+    let pushNotificationsManager: PushNotificationsManager
     
     init(_ config: BuildConfiguration) {
         switch config {
@@ -136,12 +138,16 @@ struct Dependency {
             )
             self.chatManager = ChatManager(service: FirebaseChatService())
         }
+        
+        pushNotificationsManager = PushNotificationsManager(logManager: logManager)
+            
     }
 }
 
 extension View {
     func previewAllEnvironments(isSignIn: Bool = true) -> some View {
         self
+            .environment(PushNotificationsManager())
             .environment(ChatManager(service: MockChatService()))
             .environment(AIManager(aiService: MockAIService()))
             .environment(AvatarManager(avatarService: MockAvatarService()))

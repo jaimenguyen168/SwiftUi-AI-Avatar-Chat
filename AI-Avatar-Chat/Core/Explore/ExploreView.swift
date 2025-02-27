@@ -10,8 +10,8 @@ import SwiftUI
 struct ExploreView: View {
     
     @Environment(AvatarManager.self) private var avatarManager
-    
     @Environment(LogManager.self) private var logManager
+    @Environment(PushNotificationsManager.self) private var pushNotificationsManager
     
     @State private var categories: [Character] = Character.allCases
     
@@ -23,6 +23,8 @@ struct ExploreView: View {
     let carouselWidth = customWidth(percent: 90)
     
     @State private var option: NavigationCoreOption?
+    @State private var showNotificationsButton = false
+    @State private var showPushNotificationsModal = false
     
     private var showDevSettingsButton: Bool {
         #if DEV || MOCK
@@ -65,17 +67,32 @@ struct ExploreView: View {
                         devSettingsButton
                     }
                 }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    if showNotificationsButton {
+                        pushNotificationsButton
+                    }
+                }
             })
             .sheet(isPresented: $showDevSettings, content: {
                 DevSettingsView()
             })
             .navigationDestinationCoreOption(option: $option)
             .screenAppearAnalytics(name: "ExploreView")
+            .showModal(showModal: $showPushNotificationsModal, content: {
+                pushNotificationsModal
+            })
             .task {
                 await loadFeaturedAvatars()
             }
             .task {
                 await loadPopularAvatars()
+            }
+            .task {
+                await handleShowPushNotificationButton()
+            }
+            .onFirstAppear {
+                schedulePushNotifications()
             }
         }
     }
@@ -83,6 +100,32 @@ struct ExploreView: View {
 
 // MARK: Views Section
 private extension ExploreView {
+    var pushNotificationsButton: some View {
+        Image(systemName: "bell.fill")
+            .font(.headline)
+            .padding(4)
+            .tappableBackground()
+            .foregroundStyle(.accent)
+            .customButton {
+                onPushNotificationsButtonPressed()
+            }
+    }
+    
+    var pushNotificationsModal: some View {
+        CustomModalView(
+            title: "Enable Push Notifications",
+            subtitle: "We'll send you reminders and updates!",
+            primaryButtonText: "Enable",
+            primaryButtonAction: {
+                onEnablePushNotifications()
+            },
+            secondaryButtonText: "Cancel",
+            secondaryButtonAction: {
+                onDisablePushNotifications()
+            }
+        )
+    }
+    
     var loadingIndicator: some View {
         ProgressView()
             .tint(.accent)
@@ -212,6 +255,9 @@ private extension ExploreView {
         case categoryPressed(category: Character)
         case devSettingsPressed
         case tryAgainPressed
+        case pushNotificationsPressed
+        case enablePushNotificationsPressed(isAuthorized: Bool)
+        case cancelPushNotificationsPressed
         
         var eventName: String {
             switch self {
@@ -225,6 +271,9 @@ private extension ExploreView {
             case .categoryPressed:              "ExploreView_Category_Pressed"
             case .devSettingsPressed:           "ExploreView_DevSettings_Pressed"
             case .tryAgainPressed:              "ExploreView_TryAgain_Pressed"
+            case .pushNotificationsPressed:     "ExploreView_PushNotifications_Pressed"
+            case .enablePushNotificationsPressed: "ExploreView_EnablePushNotifications_Pressed"
+            case .cancelPushNotificationsPressed: "ExploreView_CancelPushNotifications_Pressed"
             }
         }
         
@@ -240,6 +289,8 @@ private extension ExploreView {
                 return avatar.eventParameters
             case .categoryPressed(category: let category):
                 return ["category": category.rawValue]
+            case .enablePushNotificationsPressed(isAuthorized: let isAuthorized):
+                return ["is_authorized": isAuthorized]
             default: return nil
             }
         }
@@ -316,6 +367,35 @@ private extension ExploreView {
     func onDevSettingsPress() {
         logManager.trackEvent(event: Event.devSettingsPressed)
         showDevSettings = true
+    }
+    
+    func handleShowPushNotificationButton() async {
+        showNotificationsButton = await pushNotificationsManager.canRequestAuthorization()
+    }
+    
+    func onPushNotificationsButtonPressed() {
+        showPushNotificationsModal = true
+        
+        logManager.trackEvent(event: Event.pushNotificationsPressed)
+    }
+    
+    func onEnablePushNotifications() {
+        showPushNotificationsModal = false
+        
+        Task {
+            let isAuthorized = try await pushNotificationsManager.requestAuthorization()
+            logManager.trackEvent(event: Event.enablePushNotificationsPressed(isAuthorized: isAuthorized))
+            await handleShowPushNotificationButton()
+        }
+    }
+    
+    func onDisablePushNotifications() {
+        showPushNotificationsModal = false
+        logManager.trackEvent(event: Event.cancelPushNotificationsPressed)
+    }
+    
+    func schedulePushNotifications() {
+        pushNotificationsManager.schedulePushNotificationForNextWeek()
     }
 }
 
