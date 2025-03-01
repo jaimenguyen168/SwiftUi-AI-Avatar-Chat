@@ -76,10 +76,12 @@ private extension ChatsView {
                             .clipShape(Circle())
                             .padding(.vertical, 4)
                             .padding(.trailing, 6)
+                            .frame(minHeight: 64)
                             
                             Text(avatar.name ?? "")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(1)
                         }
                         .customButton {
                             onAvatarPress(avatar)

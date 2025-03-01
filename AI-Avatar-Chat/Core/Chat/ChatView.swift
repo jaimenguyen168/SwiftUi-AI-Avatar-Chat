@@ -127,6 +127,8 @@ private extension ChatView {
         }
         .foregroundStyle(.secondary)
         .font(.callout)
+        .lineLimit(1)
+        .minimumScaleFactor(0.3)
     }
     
     var sendMessageSection: some View {

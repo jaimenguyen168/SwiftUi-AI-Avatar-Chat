@@ -26,7 +26,7 @@ struct OnboardingCompletedView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(selectedColor)
             
-            Text("We've successfully set up your AI avatar chat account. You are now ready to start chatting with your new AI-generated friend!")
+            Text("We've successfully set up your account and you're' now ready to start chatting!")
                 .font(.title2)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)

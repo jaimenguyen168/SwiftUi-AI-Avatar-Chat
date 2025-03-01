@@ -24,6 +24,8 @@ struct CategoryCellView: View {
                     .foregroundStyle(.white)
                     .padding(16)
                     .gradientBackgroundForLeadingText()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.3)
             }
             .clipShape(.rect(cornerRadius: cornerRadius))
     }

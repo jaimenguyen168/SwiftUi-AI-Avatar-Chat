@@ -20,7 +20,7 @@ struct ExploreView: View {
     @State private var isFeatureLoading = true
     @State private var isPopularLoading = true
     
-    let carouselWidth = customWidth(percent: 90)
+    let carouselWidth = customWidth(percent: UIDevice.current.userInterfaceIdiom == .pad ? 95 : 90)
     
     @State private var option: NavigationCoreOption?
     @State private var showNotificationsButton = false

@@ -64,6 +64,7 @@ struct OnboardingColorView: View {
                     Text("Select a profile color")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
                 }
 
             }
@@ -84,5 +85,5 @@ struct OnboardingColorView: View {
     NavigationStack {
         OnboardingColorView()
     }
-    .environment(AppState())
+    .previewAllEnvironments()
 }

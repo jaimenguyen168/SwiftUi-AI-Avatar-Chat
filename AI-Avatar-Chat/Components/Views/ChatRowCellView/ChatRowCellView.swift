@@ -33,6 +33,7 @@ struct ChatRowCellView: View {
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                 }
                 
                 if let subheadline {
@@ -48,6 +49,9 @@ struct ChatRowCellView: View {
             if hasNewMessage {
                 Text("NEW")
                     .blueBadge()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.1)
+                    .frame(maxWidth: 50)
             }
         }
         .padding(12)

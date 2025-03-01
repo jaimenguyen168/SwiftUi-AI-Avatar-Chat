@@ -9,6 +9,8 @@ import SwiftUI
 
 struct CustomListCellView: View {
     
+    @Environment(\.colorScheme) private var colorScheme
+    
     var title: String? = "Alien"
     var subtitle: String? = "An alien is biking on the beach"
     var imageUrl: String? = Constants.randomImageUrl
@@ -43,7 +45,7 @@ struct CustomListCellView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .systemBackground))
+        .background(colorScheme.backgroundPrimary)
         .clipShape(.rect(cornerRadius: 16))
     }
 }

@@ -70,6 +70,8 @@ private extension CreateAvatarView {
             TextField("Player 1", text: $avatarName)
         } header: {
             Text("Name Your Avatar")
+                .lineLimit(1)
+                .minimumScaleFactor(0.3)
         }
     }
     
@@ -103,6 +105,8 @@ private extension CreateAvatarView {
             }
         } header: {
             Text("Attributes")
+                .lineLimit(1)
+                .minimumScaleFactor(0.3)
         }
         .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
     }
@@ -118,6 +122,8 @@ private extension CreateAvatarView {
                             onGenerateImagePress()
                         }
                         .opacity(isGenerating ? 0 : 1)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.2)
                     
                     ProgressView()
                         .tint(.accent)
@@ -137,6 +143,7 @@ private extension CreateAvatarView {
                         }
                     }
                     .clipShape(Circle())
+                    .frame(maxWidth: .infinity, maxHeight: 400)
             }
             .removeBgAndInsetsListRow()
             .padding(.horizontal, 4)

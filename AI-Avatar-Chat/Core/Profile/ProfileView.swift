@@ -105,6 +105,8 @@ private extension ProfileView {
         } header: {
             HStack(spacing: 0) {
                 Text("My Avatars")
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 
                 Spacer()
                 
@@ -233,6 +235,6 @@ private extension ProfileView {
 #Preview {
     NavigationStack {
         ProfileView()
-            .previewAllEnvironments()
     }
+    .previewAllEnvironments()
 }

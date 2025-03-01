@@ -57,6 +57,8 @@ private extension WelcomeView {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
     }
     
     var onboardingButtons: some View {
@@ -76,6 +78,8 @@ private extension WelcomeView {
                 .onTapGesture {
                     onSignInTapped()
                 }
+                .lineLimit(1)
+                .minimumScaleFactor(0.4)
         }
     }
     
@@ -93,6 +97,8 @@ private extension WelcomeView {
                 Text("Privacy Policy")
             }
         }
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
     }
 }
 
@@ -144,4 +150,5 @@ private extension WelcomeView {
 
 #Preview {
     WelcomeView()
+        .previewAllEnvironments()
 }

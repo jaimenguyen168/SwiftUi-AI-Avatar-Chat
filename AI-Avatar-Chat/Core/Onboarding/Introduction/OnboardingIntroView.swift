@@ -37,6 +37,7 @@ struct OnboardingIntroView: View {
             Text("with AI generated responses.")
         }
         .baselineOffset(6)
+        .minimumScaleFactor(0.5)
     }
     
     private var continueButton: some View {
@@ -53,4 +54,5 @@ struct OnboardingIntroView: View {
     NavigationStack {
         OnboardingIntroView()
     }
+    .previewAllEnvironments()
 }

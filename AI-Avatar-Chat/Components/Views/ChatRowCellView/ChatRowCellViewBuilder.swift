@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ChatRowCellViewBuilder: View {
     
+    @Environment(\.colorScheme) private var colorScheme
+    
     var currentUserId: String? = ""
     var chat: Chat = .mock
     var getAvatar: () async -> Avatar?
@@ -49,6 +51,7 @@ struct ChatRowCellViewBuilder: View {
             subheadline: subheadline,
             hasNewMessage: isLoading ? false : hasNewMessage
         )
+        .background(colorScheme.backgroundPrimary)
         .tappableBackground()
         .customButton(.pressable) {
             onChatPress(chat, avatar: avatar)
