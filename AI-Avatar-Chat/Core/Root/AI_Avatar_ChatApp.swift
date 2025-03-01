@@ -41,22 +41,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         #if MOCK
         // MARK: - Mock Dependency Scheme
         config = .mock(isSignedIn: true)
-        
         #elseif DEV
         // MARK: - Production Dependency Scheme + Extra Dev Tools
         config = .development
-        
         #else
         // MARK: - Production Dependency Scheme
         config = .production
-        
         #endif
         
         config.configure()
         dependencies = Dependency(config)
-
-    return true
-  }
+        return true
+    }
 }
 
 enum BuildConfiguration {

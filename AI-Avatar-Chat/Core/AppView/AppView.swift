@@ -17,13 +17,29 @@ struct AppView: View {
     @Environment(LogManager.self) private var logManager
     
     var body: some View {
-        AppViewBuilder(
-            showTabBar: appState.showTabBar,
-            tabBarView: {
-                TabBarView()
-            },
-            onboardingView: {
-                WelcomeView()
+        RootView(
+            delegate: RootDelegate(
+                onApplicationDidAppear: nil,
+                onApplicationWillEnterForeground: { _ in
+                    Task {
+                        await checkUserAuthentication()
+                    }
+                },
+                onApplicationDidBecomeActive: nil,
+                onApplicationWillResignActive: nil,
+                onApplicationDidEnterBackground: nil,
+                onApplicationWillTerminate: nil
+            ),
+            content: {
+                AppViewBuilder(
+                    showTabBar: appState.showTabBar,
+                    tabBarView: {
+                        TabBarView()
+                    },
+                    onboardingView: {
+                        WelcomeView()
+                    }
+                )
             }
         )
         .environment(appState)
